@@ -87,4 +87,7 @@ public class Writer {
 
     }
 
+    public void writeOutput(float pos, BufferedWriter writer) throws IOException {
+        writer.write(pos + "\n");
+    }
 }
