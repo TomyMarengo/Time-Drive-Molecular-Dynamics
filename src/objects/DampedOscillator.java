@@ -60,14 +60,31 @@ public class DampedOscillator implements Integrable {
         r2Map.put(-1, forceFunction.apply(r_0, r1_0) / mass);
         r2Map.put(0, forceFunction.apply(r_0, r1_0) / mass);
 
+        r3Map.put(-1, 0f);
+        r3Map.put(0, 0f);
+
+        r4Map.put(-1, 0f);
+        r4Map.put(0, 0f);
+
+        r5Map.put(-1, 0f);
+        r5Map.put(0, 0f);
+
+        /*
         r3Map.put(-1, r3Function.apply(r1_0, r2Map.get(0)));
         r3Map.put(0, r3Function.apply(r1_0, r2Map.get(0)));
 
+        System.out.println(r3Function.apply(r1_0, r2Map.get(0)));
+
         r4Map.put(-1, r4Function.apply(r2Map.get(0), r3Map.get(0)));
+
+        System.out.println(r4Function.apply(r2Map.get(0), r3Map.get(0)));
         r4Map.put(0, r4Function.apply(r2Map.get(0), r3Map.get(0)));
 
         r5Map.put(-1, r5Function.apply(r3Map.get(0), r4Map.get(0)));
+        System.out.println(r4Function.apply(r3Map.get(0), r4Map.get(0)));
         r5Map.put(0, r5Function.apply(r3Map.get(0), r4Map.get(0)));
+        */
+
     }
 
     public BiFunction<Float, Float, Float> getForceFunction() {

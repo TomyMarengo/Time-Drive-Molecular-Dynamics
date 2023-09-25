@@ -28,6 +28,16 @@ public class Particle implements Integrable {
         this.limitVelocity = limitVelocity;
         this.tau = tau;
 
+        rFunction = new FunctionWithDerivatives(getrMap());
+
+        rFunction.setDerivative(1, getR1Map());
+        rFunction.setDerivative(2, getR2Map());
+        rFunction.setDerivative(3, getR3Map());
+        rFunction.setDerivative(4, getR4Map());
+        rFunction.setDerivative(5, getR5Map());
+
+        forceFunction = (r, r1) -> (limitVelocity - r1) / tau + addedForces;
+
         rMap.put(-1, r_0);
         rMap.put(0, r_0);
 
@@ -49,16 +59,6 @@ public class Particle implements Integrable {
         float r5_0 = 0; // TODO: Preguntar que funcion tiene
         r5Map.put(-1, r5_0);
         r5Map.put(0, r5_0);
-
-        rFunction = new FunctionWithDerivatives(getrMap());
-
-        rFunction.setDerivative(1, getR1Map());
-        rFunction.setDerivative(2, getR2Map());
-        rFunction.setDerivative(3, getR3Map());
-        rFunction.setDerivative(4, getR4Map());
-        rFunction.setDerivative(5, getR5Map());
-
-        forceFunction = (r, r1) -> (limitVelocity - r1) / tau + addedForces;
     }
 
     @Override

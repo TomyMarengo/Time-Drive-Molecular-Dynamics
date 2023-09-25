@@ -81,6 +81,7 @@ public class ParticleTrain {
                 ghostParticle.getR2Map().put(step, rGear[2]);
                 ghostParticle.getR3Map().put(step, rGear[3]);
                 ghostParticle.getR4Map().put(step, rGear[4]);
+                ghostParticle.getR5Map().put(step, rGear[5]);
 
             }
             
@@ -105,16 +106,20 @@ public class ParticleTrain {
 
                 float force = 0;
                 if (collides(particle1, particle2)) {
-                    force = k * (Math.abs(particle2.getrMap().get(step) - particle1.getrMap().get(step)) - (particle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step) - particle1.getrMap().get(step));
+                    force = k * (Math.abs(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1))
+                            - (particle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1));
                 }
                 else if(collides(particle1, ghostParticle2)) {
-                    force = k * (Math.abs(ghostParticle2.getrMap().get(step) - particle1.getrMap().get(step)) - (particle1.getRadius() + ghostParticle2.getRadius())) * Math.signum(ghostParticle2.getrMap().get(step) - particle1.getrMap().get(step));
+                    force = k * (Math.abs(ghostParticle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1))
+                            - (particle1.getRadius() + ghostParticle2.getRadius())) * Math.signum(ghostParticle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1));
                 }
                 else if(collides(ghostParticle1, particle2)) {
-                    force = k * (Math.abs(particle2.getrMap().get(step) - ghostParticle1.getrMap().get(step)) - (ghostParticle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step) - ghostParticle1.getrMap().get(step));
+                    force = k * (Math.abs(particle2.getrMap().get(step - 1) - ghostParticle1.getrMap().get(step - 1))
+                            - (ghostParticle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step - 1) - ghostParticle1.getrMap().get(step - 1));
                 }
                 else if(collides(ghostParticle1, ghostParticle2)) {
-                    force = k * (Math.abs(ghostParticle2.getrMap().get(step) - ghostParticle1.getrMap().get(step)) - (ghostParticle1.getRadius() + ghostParticle2.getRadius())) * Math.signum(ghostParticle2.getrMap().get(step) - ghostParticle1.getrMap().get(step));
+                    force = k * (Math.abs(ghostParticle2.getrMap().get(step - 1) - ghostParticle1.getrMap().get(step - 1))
+                            - (ghostParticle1.getRadius() + ghostParticle2.getRadius())) * Math.signum(ghostParticle2.getrMap().get(step - 1) - ghostParticle1.getrMap().get(step - 1));
                 }
 
                 if (force != 0) {
@@ -128,7 +133,7 @@ public class ParticleTrain {
     }
 
     private boolean collides(Particle particle1, Particle particle2) {
-        return Math.abs(particle1.getrMap().get(step) - particle2.getrMap().get(step)) <= particle1.getRadius() + particle2.getRadius();
+        return Math.abs(particle1.getrMap().get(step - 1) - particle2.getrMap().get(step - 1)) <= particle1.getRadius() + particle2.getRadius();
     }
 
     public static void main(String[] args) {

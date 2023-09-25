@@ -96,13 +96,13 @@ public class Integrator {
 
         r[0] = r_function.calculateDerivative(0, step - 1)
                 + r_function.calculateDerivative(1, step - 1) * deltaT
-                + 1f / 2f * force_function.apply(r_function.calculateDerivative(0, step - 1), r_function.calculateDerivative(1, step - 1)) / mass * deltaT * deltaT
+                + 1f / 2f * r_function.calculateDerivative(2, step - 1) * deltaT * deltaT
                 + 1f / 6f * r_function.calculateDerivative(3, step - 1) * deltaT * deltaT * deltaT;
 
         //r(t-deltaT)
         float r_t_minus_deltaT = r_function.calculateDerivative(0, step - 1)
                 - r_function.calculateDerivative(1, step - 1) * deltaT
-                + 1f / 2f * force_function.apply(r_function.calculateDerivative(0, step - 1), r_function.calculateDerivative(1, step - 1)) / mass * deltaT * deltaT
+                + 1f / 2f * r_function.calculateDerivative(2, step - 1) * deltaT * deltaT
                 - 1f / 6f * r_function.calculateDerivative(3, step - 1) * deltaT * deltaT * deltaT;
 
         r[1] = (r[0] - r_t_minus_deltaT) / (2 * deltaT);
