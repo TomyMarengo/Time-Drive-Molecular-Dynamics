@@ -4,6 +4,7 @@ import utils.Integrator;
 import utils.Writer;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class ParticleTrain {
@@ -27,8 +28,10 @@ public class ParticleTrain {
         this.maxStep = (int) (tf / deltaT);
 
         try {
+            DecimalFormat decimalFormat = new DecimalFormat("#.####");
+            String formattedDeltaT = decimalFormat.format(deltaT);
             bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/particle_train_"
-                    + particles.size() + "_" + deltaT + ".txt", true));
+                    + particles.size() + "_" + formattedDeltaT + ".txt", true));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -67,28 +70,29 @@ public class ParticleTrain {
                     ghostParticle.getrMap().put(step - 1, particle.getrMap().get(step - 1) - L);
                 }
 
-                float[] rGear = Integrator.gearPredictorCorrector(5, particle, step, deltaT);
-                particle.getrMap().put(step, rGear[0]);
-                particle.getR1Map().put(step, rGear[1]);
-                particle.getR2Map().put(step, rGear[2]);
-                particle.getR3Map().put(step, rGear[3]);
-                particle.getR4Map().put(step, rGear[4]);
-                particle.getR5Map().put(step, rGear[5]);
+                float[] rBeeman = Integrator.beeman(particle, step, deltaT);
+                particle.getrMap().put(step, rBeeman[0]);
+                particle.getR1Map().put(step, rBeeman[1]);
+                particle.getR2Map().put(j, particle.getForceFunction().apply(rBeeman[0], rBeeman[1]) / particle.getMass());
 
-                rGear = Integrator.gearPredictorCorrector(5, ghostParticle, step, deltaT);
-                ghostParticle.getrMap().put(step, rGear[0]);
-                ghostParticle.getR1Map().put(step, rGear[1]);
-                ghostParticle.getR2Map().put(step, rGear[2]);
-                ghostParticle.getR3Map().put(step, rGear[3]);
-                ghostParticle.getR4Map().put(step, rGear[4]);
-                ghostParticle.getR5Map().put(step, rGear[5]);
+                rBeeman = Integrator.beeman(ghostParticle, step, deltaT);
+                ghostParticle.getrMap().put(step, rBeeman[0]);
+                ghostParticle.getR1Map().put(step, rBeeman[1]);
+                ghostParticle.getR2Map().put(j, ghostParticle.getForceFunction().apply(rBeeman[0], rBeeman[1]) / ghostParticle.getMass());
 
             }
-            
-            writer.writeStep(step * deltaT, step, particles, ghostParticles, bw);
+
+            if (deltaT >= 0.1f || (step % ((int) (0.1 / deltaT)) == 0)) {
+                writer.writeStep(step * deltaT, step, particles, ghostParticles, bw);
+            }
+
         }
 
-        
+        try {
+            bw.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -144,14 +148,14 @@ public class ParticleTrain {
         float L = 1.35f; // [m]
         float tau = 1; // [s]
 
-        List<Particle> particles = new ArrayList<>();
         Random random = new Random();
 
         float[] deltaTs = {0.1f, 0.01f, 0.001f, 0.0001f};
         int[] Ns = {10, 15, 20, 25};
-        int tf = 5; // [s]
+        int tf = 50; // [s]
 
         for (int n : Ns) {
+            List<Particle> particles = new ArrayList<>();
 
             // Initilize particles
             float[] xs = new float[n];
