@@ -1,9 +1,16 @@
+package objects;
+
+import functions.FunctionWithDerivatives;
+import functions.Integrable;
+import utils.Writer;
+import utils.Integrator;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.function.BiFunction;
 
-public class DampedOscillator implements Integrable{
+public class DampedOscillator implements Integrable {
     private final float mass; // [kg]
     private final float k; // [N/m]
     private final float gamma; // [kg/s]
@@ -124,12 +131,12 @@ public class DampedOscillator implements Integrable{
         rBeeman[1] = v0;
 
         BufferedWriter bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_beeman.txt", true));
-        writer.writeOutput(rBeeman[0], bw);
+        writer.writePos(rBeeman[0], bw);
 
         while (t < tf) {
             rBeeman = Integrator.beeman(dampedOscillator, t, deltaT);
             t += deltaT;
-            writer.writeOutput(rBeeman[0], bw);
+            writer.writePos(rBeeman[0], bw);
         }
         bw.close();
 
@@ -140,12 +147,12 @@ public class DampedOscillator implements Integrable{
         rVerlet[1] = v0;
 
         bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_verlet.txt", true));
-        writer.writeOutput(rVerlet[0], bw);
+        writer.writePos(rVerlet[0], bw);
 
         while (t < tf) {
             rVerlet = Integrator.originalVerlet(dampedOscillator, t, deltaT);
             t += deltaT;
-            writer.writeOutput(rVerlet[0], bw);
+            writer.writePos(rVerlet[0], bw);
         }
         bw.close();
 
@@ -156,12 +163,12 @@ public class DampedOscillator implements Integrable{
         rGear[1] = v0;
 
         bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_gear.txt", true));
-        writer.writeOutput(rGear[0], bw);
+        writer.writePos(rGear[0], bw);
 
         while (t < tf) {
             rGear = Integrator.gearPredictorCorrector(5, dampedOscillator, t, deltaT);
             t += deltaT;
-            writer.writeOutput(rGear[0], bw);
+            writer.writePos(rGear[0], bw);
         }
         bw.close();
 

@@ -1,3 +1,5 @@
+package functions;
+
 import java.util.function.BiFunction;
 
 public interface Integrable {

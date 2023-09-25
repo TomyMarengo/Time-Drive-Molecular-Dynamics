@@ -1,3 +1,7 @@
+package functions;
+
+import functions.Derivatives;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;

@@ -1,3 +1,8 @@
+package utils;
+
+import functions.FunctionWithDerivatives;
+import functions.Integrable;
+
 import java.util.function.BiFunction;
 
 public class Integrator {
