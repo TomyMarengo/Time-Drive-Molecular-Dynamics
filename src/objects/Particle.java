@@ -29,6 +29,9 @@ public class Particle implements Comparable<Particle>, Integrable {
         this.limitVelocity = limitVelocity;
         this.tau = tau;
         rFunction = new FunctionWithDerivatives(this::r);
+        rFunction.setDerivative(0, this::r);
+        rFunction.setDerivative(1, this::r1);
+        rFunction.setDerivative(2, this::r2);
 
     }
 
@@ -51,7 +54,15 @@ public class Particle implements Comparable<Particle>, Integrable {
     }
 
     private float r(float t) { //TODO: Preguntar por esta funcion
-        return 0;
+        return x;
+    }
+
+    private float r1(float t) { //TODO: Preguntar por esta funcion
+        return velocityX;
+    }
+
+    private float r2(float t) {
+        return getForceFunction().apply(rFunction.calculateDerivative(0, t), rFunction.calculateDerivative(1, t)) / mass;
     }
 
     @Override
