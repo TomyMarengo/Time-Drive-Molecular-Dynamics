@@ -9,37 +9,32 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 
 public class Particle implements Comparable<Particle>, Integrable {
+    private final float id;
     private float x; // X-coordinate of the particle
     private float velocityX; // X-component of the velocity
     private final float mass; // Mass of the particle
     private final float radius; // Radius of the particle
     private final float limitVelocity;
     private final float tau;
-    private final List<Float> addedForces;
+    private float addedForces = 0;
     private final FunctionWithDerivatives rFunction;
 
 
-    public Particle(float x, float velocityX, float mass, float radius, float limitVelocity, float tau) {
+    public Particle(float id, float x, float velocityX, float mass, float radius, float limitVelocity, float tau) {
+        this.id = id;
         this.x = x;
         this.velocityX = velocityX;
         this.mass = mass;
         this.radius = radius;
         this.limitVelocity = limitVelocity;
         this.tau = tau;
-
-        this.addedForces = new ArrayList<>();
         rFunction = new FunctionWithDerivatives(this::r);
 
     }
 
     @Override
     public BiFunction<Float, Float, Float> getForceFunction() {
-        float force = 0;
-        for (float addedForce : addedForces) {
-            force += addedForce;
-        }
-        float finalForce = force;
-        return (r, v) -> (limitVelocity - v) / tau + finalForce;
+        return (r, v) -> (limitVelocity - v) / tau + addedForces;
     }
 
     @Override
@@ -47,15 +42,12 @@ public class Particle implements Comparable<Particle>, Integrable {
         return rFunction;
     }
 
-    public int addForce(float force) {
-        //add force to addedForces array and return the index of the added force
-        int index = addedForces.size();
-        addedForces.add(force);
-        return index;
+    public void addForce(float force) {
+        addedForces += force;
     }
 
-    public void deleteForce(int index) {
-        addedForces.remove(index);
+    public void removeForces() {
+        addedForces = 0;
     }
 
     private float r(float t) { //TODO: Preguntar por esta funcion
@@ -69,12 +61,12 @@ public class Particle implements Comparable<Particle>, Integrable {
 
     @Override
     public int compareTo(Particle otherParticle) {
-        return Double.compare(this.x, otherParticle.x);
+        return Double.compare(this.id, otherParticle.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x);
+        return Objects.hash(id);
     }
 
     @Override
@@ -82,7 +74,7 @@ public class Particle implements Comparable<Particle>, Integrable {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Particle particle = (Particle) obj;
-        return Objects.equals(x, particle.x);
+        return Objects.equals(id, particle.id);
     }
 
     public float getX() {
@@ -111,4 +103,15 @@ public class Particle implements Comparable<Particle>, Integrable {
         this.velocityX = velocityX;
     }
 
+    public float getId() {
+        return id;
+    }
+
+    public float getLimitVelocity() {
+        return limitVelocity;
+    }
+
+    public float getTau() {
+        return tau;
+    }
 }

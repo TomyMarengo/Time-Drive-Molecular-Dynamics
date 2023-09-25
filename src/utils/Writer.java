@@ -8,18 +8,30 @@ import objects.Particle;
 
 public class Writer {
 
-    public void writePos(float pos, BufferedWriter writer) throws IOException {
-        writer.write(pos + "\n");
+    public void writePos(float pos, BufferedWriter writer) {
+        try {
+            writer.write(pos + "\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void writeStep(int step, List<Particle> particles, BufferedWriter writer) throws IOException {
-        writer.write("Step " + step + "\n");
+    public void writeStep(int step, List<Particle> particles, List<Particle> ghostParticles, BufferedWriter writer)  {
+        try {
+            writer.write("Step " + step + "\n");
 
-        for (Particle particle : particles) {
-            writer.write(particle.getX() + " " + particle.getX() + " " +
-                    particle.getVelocityX() + " " + particle.getVelocityX() + "\n");
+            for (Particle particle : particles) {
+                writer.write(particle.getX() + " " + particle.getX() + " " +
+                        particle.getVelocityX() + " " + particle.getVelocityX() + "\n");
+            }
+            for (Particle particle : ghostParticles) {
+                writer.write(particle.getX() + " " + particle.getX() + " " +
+                        particle.getVelocityX() + " " + particle.getVelocityX() + "\n");
+            }
+
+            writer.write("\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        writer.write("\n");
     }
 }
