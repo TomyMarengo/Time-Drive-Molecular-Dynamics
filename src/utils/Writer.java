@@ -21,12 +21,10 @@ public class Writer {
             writer.write("Step " + step + "\n");
 
             for (Particle particle : particles) {
-                writer.write(particle.getX() + " " + particle.getX() + " " +
-                        particle.getVelocityX() + " " + particle.getVelocityX() + "\n");
+                writer.write(particle.getX() + " " + particle.getVelocityX() + "\n");
             }
             for (Particle particle : ghostParticles) {
-                writer.write(particle.getX() + " " + particle.getX() + " " +
-                        particle.getVelocityX() + " " + particle.getVelocityX() + "\n");
+                writer.write(particle.getX() + " " + particle.getVelocityX() + "\n");
             }
 
             writer.write("\n");
