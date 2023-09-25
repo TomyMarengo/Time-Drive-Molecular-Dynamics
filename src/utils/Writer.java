@@ -16,9 +16,9 @@ public class Writer {
         }
     }
 
-    public void writeStep(int step, List<Particle> particles, List<Particle> ghostParticles, BufferedWriter writer)  {
+    public void writeStep(float time, List<Particle> particles, List<Particle> ghostParticles, BufferedWriter writer)  {
         try {
-            writer.write("Step " + step + "\n");
+            writer.write("Time " + time + "\n");
 
             for (Particle particle : particles) {
                 writer.write(particle.getX() + " " + particle.getVelocityX() + "\n");

@@ -43,12 +43,15 @@ public class ParticleTrain {
     }
 
     public void start() {
-        for (int i = 0; i < particles.size(); i++) {
-            particles.get(i).removeForces();
-            ghostParticles.get(i).removeForces();
-        }
-
         for (float t = 0; t <= tf; t += deltaT) {
+
+            System.out.println(t);
+
+            for (int i = 0; i < particles.size(); i++) {
+                particles.get(i).removeForces();
+                ghostParticles.get(i).removeForces();
+            }
+
             calculateCollisions();
 
             for (int i = 0; i < particles.size(); i++) {
@@ -62,12 +65,12 @@ public class ParticleTrain {
 
                 if (particle.getX() > L + particle.getRadius()) {
                     particle.setX(t, deltaT,particle.getX() - L);
-                    ghostParticle.setX(t, deltaT,ghostParticle.getX() - L);
+                    ghostParticle.setX(t, deltaT,particle.getX() - L);
                 }
 
             }
 
-            writer.writeStep((int) (t / deltaT), particles, ghostParticles, bw);
+            writer.writeStep(t, particles, ghostParticles, bw);
         }
     }
 
@@ -118,7 +121,7 @@ public class ParticleTrain {
         float m = 0.025f; // [kg]
         float L = 1.35f; // [m]
         float tau = 1; // [s]
-        float N = 25; // Number of particles
+        int N = 15; // Number of particles
 
         float deltaT = 0.01f; // [s]
         float tf = 5; // [s]
@@ -126,9 +129,21 @@ public class ParticleTrain {
         List<Particle> particles = new ArrayList<>();
         Random random = new Random();
 
+        // Divide L in N parts, and put a particle in each part
+        float[] xs = new float[N];
         for (int i = 0; i < N; i++) {
-            // random x between 0 and L, random limitVelocity between 9 and 12
-            float x = random.nextFloat() * L;
+            xs[i] = i * L / N;
+        }
+        float[] taken = new float[N];
+
+        for (int i = 0; i < N; i++) {
+            // random x between xs[0] and xs[N-1], if it's already taken, try again
+            int index = random.nextInt(N);
+            while (taken[index] == 1) {
+                index = random.nextInt(N);
+            }
+            taken[index] = 1;
+            float x = xs[index];
             float limitVelocity = random.nextFloat() * 0.03f + 0.09f; // [9-12] [cm/s]
 
             particles.add(new Particle(i, x, limitVelocity, m, r, limitVelocity, tau));
