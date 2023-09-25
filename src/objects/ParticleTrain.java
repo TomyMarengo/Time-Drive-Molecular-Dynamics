@@ -15,6 +15,8 @@ public class ParticleTrain {
     private final float tf;
     private final float L;
     private final float k = 2.5f; //  [kg/(s^2)]
+    private final int maxStep;
+    private int step = 0;
 
 
     public ParticleTrain(List<Particle> particles, float deltaT, float tf, float L) {
@@ -22,6 +24,7 @@ public class ParticleTrain {
         this.deltaT = deltaT;
         this.tf = tf;
         this.L = L;
+        this.maxStep = (int) (tf / deltaT);
 
         try {
             bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/particle_train_"
@@ -33,20 +36,20 @@ public class ParticleTrain {
         this.ghostParticles = new ArrayList<>();
         for (Particle particle : particles) {
             this.ghostParticles.add(
-                    new Particle(
-                            particle.getId(), particle.getX() - L, particle.getLimitVelocity(),
-                            particle.getMass(), particle.getRadius(), particle.getLimitVelocity(), particle.getTau()
-                    )
+                    new Particle(particle.getMass(), particle.getRadius(), particle.getLimitVelocity(),
+                            particle.getTau(), particle.getrMap().get(step) - L, particle.getLimitVelocity())
             );
         }
 
     }
 
+
     public void start() {
 
-        for (float t = 0; t <= tf; t += deltaT) {
+        writer.writeStep(step * deltaT, step, particles, ghostParticles, bw);
 
-            writer.writeStep(t, particles, ghostParticles, bw);
+        for (int j = 1; j <= maxStep; j++) {
+            this.step = j;
 
             for (int i = 0; i < particles.size(); i++) {
                 particles.get(i).removeForces();
@@ -58,21 +61,33 @@ public class ParticleTrain {
             for (int i = 0; i < particles.size(); i++) {
                 Particle particle = particles.get(i);
                 Particle ghostParticle = ghostParticles.get(i);
-                float[] r = Integrator.beeman(particle, t, deltaT);
-                particle.setX(t, deltaT, r[0]);
-                particle.setVelocityX(t, deltaT, r[1]);
-                ghostParticle.setX(t, deltaT,r[0] - L);
-                ghostParticle.setVelocityX(t, deltaT, r[1]);
 
-                if (particle.getX() > L + particle.getRadius()) {
-                    particle.setX(t, deltaT,particle.getX() - L);
-                    ghostParticle.setX(t, deltaT,particle.getX() - L);
+                if (particle.getrMap().get(step - 1) > L + particle.getRadius()) {
+                    particle.getrMap().put(step - 1, particle.getrMap().get(step - 1) - L);
+                    ghostParticle.getrMap().put(step - 1, particle.getrMap().get(step - 1) - L);
                 }
 
+                float[] rGear = Integrator.gearPredictorCorrector(5, particle, step, deltaT);
+                particle.getrMap().put(step, rGear[0]);
+                particle.getR1Map().put(step, rGear[1]);
+                particle.getR2Map().put(step, rGear[2]);
+                particle.getR3Map().put(step, rGear[3]);
+                particle.getR4Map().put(step, rGear[4]);
+                particle.getR5Map().put(step, rGear[5]);
+
+                rGear = Integrator.gearPredictorCorrector(5, ghostParticle, step, deltaT);
+                ghostParticle.getrMap().put(step, rGear[0]);
+                ghostParticle.getR1Map().put(step, rGear[1]);
+                ghostParticle.getR2Map().put(step, rGear[2]);
+                ghostParticle.getR3Map().put(step, rGear[3]);
+                ghostParticle.getR4Map().put(step, rGear[4]);
+
             }
+            
+            writer.writeStep(step * deltaT, step, particles, ghostParticles, bw);
         }
 
-        writer.writeStep(tf, particles, ghostParticles, bw);
+        
     }
 
 
@@ -86,19 +101,20 @@ public class ParticleTrain {
             for (int j = i + 1; j < particles.size(); j++) {
                 Particle particle2 = particles.get(j);
                 Particle ghostParticle2 = ghostParticles.get(j);
+                
 
                 float force = 0;
                 if (collides(particle1, particle2)) {
-                    force = k * (Math.abs(particle2.getX() - particle1.getX()) - (particle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getX() - particle1.getX());
+                    force = k * (Math.abs(particle2.getrMap().get(step) - particle1.getrMap().get(step)) - (particle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step) - particle1.getrMap().get(step));
                 }
                 else if(collides(particle1, ghostParticle2)) {
-                    force = k * (Math.abs(ghostParticle2.getX() - particle1.getX()) - (particle1.getRadius() + ghostParticle2.getRadius())) * Math.signum(ghostParticle2.getX() - particle1.getX());
+                    force = k * (Math.abs(ghostParticle2.getrMap().get(step) - particle1.getrMap().get(step)) - (particle1.getRadius() + ghostParticle2.getRadius())) * Math.signum(ghostParticle2.getrMap().get(step) - particle1.getrMap().get(step));
                 }
                 else if(collides(ghostParticle1, particle2)) {
-                    force = k * (Math.abs(particle2.getX() - ghostParticle1.getX()) - (ghostParticle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getX() - ghostParticle1.getX());
+                    force = k * (Math.abs(particle2.getrMap().get(step) - ghostParticle1.getrMap().get(step)) - (ghostParticle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step) - ghostParticle1.getrMap().get(step));
                 }
                 else if(collides(ghostParticle1, ghostParticle2)) {
-                    force = k * (Math.abs(ghostParticle2.getX() - ghostParticle1.getX()) - (ghostParticle1.getRadius() + ghostParticle2.getRadius())) * Math.signum(ghostParticle2.getX() - ghostParticle1.getX());
+                    force = k * (Math.abs(ghostParticle2.getrMap().get(step) - ghostParticle1.getrMap().get(step)) - (ghostParticle1.getRadius() + ghostParticle2.getRadius())) * Math.signum(ghostParticle2.getrMap().get(step) - ghostParticle1.getrMap().get(step));
                 }
 
                 if (force != 0) {
@@ -112,7 +128,7 @@ public class ParticleTrain {
     }
 
     private boolean collides(Particle particle1, Particle particle2) {
-        return Math.abs(particle1.getX() - particle2.getX()) <= particle1.getRadius() + particle2.getRadius();
+        return Math.abs(particle1.getrMap().get(step) - particle2.getrMap().get(step)) <= particle1.getRadius() + particle2.getRadius();
     }
 
     public static void main(String[] args) {
@@ -122,36 +138,41 @@ public class ParticleTrain {
         float m = 0.025f; // [kg]
         float L = 1.35f; // [m]
         float tau = 1; // [s]
-        int N = 15; // Number of particles
-
-        float deltaT = 0.01f; // [s]
-        float tf = 5; // [s]
 
         List<Particle> particles = new ArrayList<>();
         Random random = new Random();
 
-        // Divide L in N parts, and put a particle in each part
-        float[] xs = new float[N];
-        for (int i = 0; i < N; i++) {
-            xs[i] = i * L / N;
-        }
-        float[] taken = new float[N];
+        float[] deltaTs = {0.1f, 0.01f, 0.001f, 0.0001f};
+        int[] Ns = {10, 15, 20, 25};
+        int tf = 5; // [s]
 
-        for (int i = 0; i < N; i++) {
-            // random x between xs[0] and xs[N-1], if it's already taken, try again
-            int index = random.nextInt(N);
-            while (taken[index] == 1) {
-                index = random.nextInt(N);
+        for (int n : Ns) {
+
+            // Initilize particles
+            float[] xs = new float[n];
+            for (int i = 0; i < n; i++) {
+                xs[i] = i * L / n;
             }
-            taken[index] = 1;
-            float x = xs[index];
-            float limitVelocity = random.nextFloat() * 0.03f + 0.09f; // [9-12] [cm/s]
+            float[] taken = new float[n];
 
-            particles.add(new Particle(i, x, limitVelocity, m, r, limitVelocity, tau));
+            for (int i = 0; i < n; i++) {
+                // random x between xs[0] and xs[N-1], if it's already taken, try again
+                int index = random.nextInt(n);
+                while (taken[index] == 1) {
+                    index = random.nextInt(n);
+                }
+                taken[index] = 1;
+                float x = xs[index];
+                float limitVelocity = random.nextFloat() * 0.03f + 0.09f; // [9-12] [cm/s]
+
+                particles.add(new Particle(m, r, limitVelocity, tau, x, limitVelocity));
+            }
+
+            for (float deltaT : deltaTs) {
+                ParticleTrain particleTrain = new ParticleTrain(particles, deltaT, tf, L);
+                particleTrain.start();
+            }
         }
-
-        ParticleTrain particleTrain = new ParticleTrain(particles, deltaT, tf, L);
-        particleTrain.start();
 
     }
 }

@@ -6,38 +6,64 @@ import functions.Integrable;
 import java.util.*;
 import java.util.function.BiFunction;
 
-public class Particle implements Comparable<Particle>, Integrable {
-    private final float id;
-    private float x; // X-coordinate of the particle
-    private Map<Float, Float> positionMap = new HashMap<>();
-    private float velocityX; // X-component of the velocity
-    private Map<Float, Float> velocityMap = new HashMap<>();
+public class Particle implements Integrable {
     private final float mass; // Mass of the particle
     private final float radius; // Radius of the particle
     private final float limitVelocity;
     private final float tau;
+    private Map<Integer, Float> rMap = new HashMap<>();
+    private Map<Integer, Float> r1Map = new HashMap<>();
+    private Map<Integer, Float> r2Map = new HashMap<>();
+    private Map<Integer, Float> r3Map = new HashMap<>();
+    private Map<Integer, Float> r4Map = new HashMap<>();
+    private Map<Integer, Float> r5Map = new HashMap<>();
     private float addedForces = 0;
     private final FunctionWithDerivatives rFunction;
+    private final BiFunction<Float, Float, Float> forceFunction;
 
 
-    public Particle(float id, float x, float velocityX, float mass, float radius, float limitVelocity, float tau) {
-        this.id = id;
-        this.x = x;
-        this.velocityX = velocityX;
+    public Particle(float mass, float radius, float limitVelocity, float tau, float r_0, float r1_0) {
         this.mass = mass;
         this.radius = radius;
         this.limitVelocity = limitVelocity;
         this.tau = tau;
-        rFunction = new FunctionWithDerivatives(this::r);
-        rFunction.setDerivative(0, this::r);
-        rFunction.setDerivative(1, this::r1);
-        rFunction.setDerivative(2, this::r2);
 
+        rMap.put(-1, r_0);
+        rMap.put(0, r_0);
+
+        r1Map.put(-1, r1_0);
+        r1Map.put(0, r1_0);
+
+        float r2_0 = getForceFunction().apply(r_0, r1_0) / mass;
+        r2Map.put(-1, r2_0);
+        r2Map.put(0, r2_0);
+
+        float r3_0 = 0;  // TODO: Preguntar que funcion tiene
+        r3Map.put(-1, r3_0);
+        r3Map.put(0, r3_0);
+
+        float r4_0 = 0; // TODO: Preguntar que funcion tiene
+        r4Map.put(-1, r4_0);
+        r4Map.put(0, r4_0);
+
+        float r5_0 = 0; // TODO: Preguntar que funcion tiene
+        r5Map.put(-1, r5_0);
+        r5Map.put(0, r5_0);
+
+        rFunction = new FunctionWithDerivatives(getrMap());
+
+        rFunction.setDerivative(1, getR1Map());
+        rFunction.setDerivative(2, getR2Map());
+        rFunction.setDerivative(3, getR3Map());
+        rFunction.setDerivative(4, getR4Map());
+        rFunction.setDerivative(5, getR5Map());
+
+        forceFunction = (r, r1) -> (limitVelocity - r1) / tau + addedForces;
     }
 
     @Override
     public BiFunction<Float, Float, Float> getForceFunction() {
-        return (r, v) -> (limitVelocity - v) / tau + addedForces;
+        return forceFunction;
     }
 
     @Override
@@ -53,47 +79,28 @@ public class Particle implements Comparable<Particle>, Integrable {
         addedForces = 0;
     }
 
-    private float r(float t) {
-        return positionMap.getOrDefault(t, x);
+    public Map<Integer, Float> getrMap() {
+        return rMap;
     }
 
-    private float r1(float t) {
-        return velocityMap.getOrDefault(t, velocityX);
+    public Map<Integer, Float> getR1Map() {
+        return r1Map;
     }
 
-    private float r2(float t) {
-        return getForceFunction().apply(rFunction.calculateDerivative(0, t), rFunction.calculateDerivative(1, t)) / mass;
+    public Map<Integer, Float> getR2Map() {
+        return r2Map;
     }
 
-    @Override
-    public String toString() {
-        return "{ " + x + ", " + velocityX + " }";
+    public Map<Integer, Float> getR3Map() {
+        return r3Map;
     }
 
-    @Override
-    public int compareTo(Particle otherParticle) {
-        return Double.compare(this.id, otherParticle.id);
+    public Map<Integer, Float> getR4Map() {
+        return r4Map;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Particle particle = (Particle) obj;
-        return Objects.equals(id, particle.id);
-    }
-
-    public float getX() {
-        return x;
-    }
-
-    public float getVelocityX() {
-        return velocityX;
+    public Map<Integer, Float> getR5Map() {
+        return r5Map;
     }
 
     public float getRadius() {
@@ -103,23 +110,6 @@ public class Particle implements Comparable<Particle>, Integrable {
     @Override
     public float getMass() {
         return mass;
-    }
-
-
-    public void setX(float t, float deltaT, float x) {
-        this.x = x;
-        positionMap.put(t, x);
-        positionMap.entrySet().removeIf(entry -> entry.getKey() < t - 2*deltaT);
-    }
-
-    public void setVelocityX(float t, float deltaT, float velocityX) {
-        this.velocityX = velocityX;
-        velocityMap.put(t, velocityX);
-        velocityMap.entrySet().removeIf(entry -> entry.getKey() < t - 2*deltaT);
-    }
-
-    public float getId() {
-        return id;
     }
 
     public float getLimitVelocity() {

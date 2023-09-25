@@ -16,7 +16,7 @@ public class Integrator {
         return result;
     }
 
-    public static float[] gearPredictorCorrector(int order, Integrable model, float t, float deltaT) {
+    public static float[] gearPredictorCorrector(int order, Integrable model, int step, float deltaT) {
         //r_function
         FunctionWithDerivatives r_function = model.getrFunction();
         //force_function
@@ -37,7 +37,7 @@ public class Integrator {
         float[] rp = new float[order + 1];
         for (int i = 0; i <= order; i++) {
             for (int j = i; j <= order; j++) {
-                rp[i] += r_function.calculateDerivative(j, t) * (float) Math.pow(deltaT, j) / factorial(j);
+                rp[i] += r_function.calculateDerivative(j, step - 1) * (float) Math.pow(deltaT, j) / factorial(j);
             }
         }
 
@@ -50,14 +50,14 @@ public class Integrator {
         // 3) Correct
         float[] r = new float[order + 1];
 
-        for (int i = 0; i < 2; i++) { //Only r and v
+        for (int i = 0; i <= order; i++) { //Only r and v
             r[i] = rp[i] + coefficents[order][i] * deltaR2 * factorial(i) / (float) Math.pow(deltaT, i);
         }
 
         return r;
     }
 
-    public static float[] beeman(Integrable model, float t, float deltaT) {
+    public static float[] beeman(Integrable model, int step, float deltaT) {
         //r_function
         FunctionWithDerivatives r_function = model.getrFunction();
         //force_function
@@ -67,24 +67,24 @@ public class Integrator {
 
         float[] r = new float[2]; // r and v
 
-        r[0] = r_function.calculateDerivative(0, t)
-                + r_function.calculateDerivative(1, t) * deltaT
-                + 2f / 3f * r_function.calculateDerivative(2, t) * deltaT * deltaT
-                - 1f / 6f * r_function.calculateDerivative(2, t - deltaT) * deltaT * deltaT;
+        r[0] = r_function.calculateDerivative(0, step - 1)
+                + r_function.calculateDerivative(1, step - 1) * deltaT
+                + 2f / 3f * r_function.calculateDerivative(2, step - 1) * deltaT * deltaT
+                - 1f / 6f * r_function.calculateDerivative(2, step - 2) * deltaT * deltaT;
 
-        float vp = r_function.calculateDerivative(1, t)
-                + 3f / 2f * r_function.calculateDerivative(2, t) * deltaT
-                - 1f / 2f * r_function.calculateDerivative(2, t - deltaT) * deltaT;
+        float vp = r_function.calculateDerivative(1, step - 1)
+                + 3f / 2f * r_function.calculateDerivative(2, step - 1) * deltaT
+                - 1f / 2f * r_function.calculateDerivative(2, step - 2) * deltaT;
 
-        r[1] = r_function.calculateDerivative(1,t)
+        r[1] = r_function.calculateDerivative(1, step - 1)
                 + 5f / 12f * force_function.apply(r[0], vp) / mass * deltaT
-                + 2f / 3f * r_function.calculateDerivative(2, t) * deltaT
-                - 1f / 12f * r_function.calculateDerivative(2, t - deltaT) * deltaT;
+                + 2f / 3f * r_function.calculateDerivative(2, step - 1) * deltaT
+                - 1f / 12f * r_function.calculateDerivative(2, step - 2) * deltaT;
 
         return r;
     }
 
-    public static float[] originalVerlet(Integrable model, float t, float deltaT) {
+    public static float[] originalVerlet(Integrable model, int step, float deltaT) {
         //r_function
         FunctionWithDerivatives r_function = model.getrFunction();
         //force_function
@@ -94,16 +94,16 @@ public class Integrator {
 
         float[] r = new float[2]; // r and v
 
-        r[0] = r_function.calculateDerivative(0, t)
-                + r_function.calculateDerivative(1, t) * deltaT
-                + 1f / 2f * force_function.apply(r_function.calculateDerivative(0, t), r_function.calculateDerivative(1, t)) / mass * deltaT * deltaT
-                + 1f / 6f * r_function.calculateDerivative(3, t) * deltaT * deltaT * deltaT;
+        r[0] = r_function.calculateDerivative(0, step - 1)
+                + r_function.calculateDerivative(1, step - 1) * deltaT
+                + 1f / 2f * force_function.apply(r_function.calculateDerivative(0, step - 1), r_function.calculateDerivative(1, step - 1)) / mass * deltaT * deltaT
+                + 1f / 6f * r_function.calculateDerivative(3, step - 1) * deltaT * deltaT * deltaT;
 
         //r(t-deltaT)
-        float r_t_minus_deltaT = r_function.calculateDerivative(0, t)
-                - r_function.calculateDerivative(1, t) * deltaT
-                + 1f / 2f * force_function.apply(r_function.calculateDerivative(0, t), r_function.calculateDerivative(1, t)) / mass * deltaT * deltaT
-                - 1f / 6f * r_function.calculateDerivative(3, t) * deltaT * deltaT * deltaT;
+        float r_t_minus_deltaT = r_function.calculateDerivative(0, step - 1)
+                - r_function.calculateDerivative(1, step - 1) * deltaT
+                + 1f / 2f * force_function.apply(r_function.calculateDerivative(0, step - 1), r_function.calculateDerivative(1, step - 1)) / mass * deltaT * deltaT
+                - 1f / 6f * r_function.calculateDerivative(3, step - 1) * deltaT * deltaT * deltaT;
 
         r[1] = (r[0] - r_t_minus_deltaT) / (2 * deltaT);
 

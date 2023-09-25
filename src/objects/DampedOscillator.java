@@ -8,6 +8,8 @@ import utils.Integrator;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 public class DampedOscillator implements Integrable {
@@ -15,96 +17,95 @@ public class DampedOscillator implements Integrable {
     private final float k; // [N/m]
     private final float gamma; // [kg/s]
     private final float A = 1; // [m]
-    private float r; // [m]
-    private float v; // [m/s]
+    private Map<Integer, Float> rMap = new HashMap<>();
+    private Map<Integer, Float> r1Map = new HashMap<>();
+    private Map<Integer, Float> r2Map = new HashMap<>();
+    private Map<Integer, Float> r3Map = new HashMap<>();
+    private Map<Integer, Float> r4Map = new HashMap<>();
+    private Map<Integer, Float> r5Map = new HashMap<>();
 
     private final FunctionWithDerivatives rFunction;
     private final BiFunction<Float, Float, Float> forceFunction;
+    private final BiFunction<Float, Float, Float> r3Function;
 
-
-    public DampedOscillator(float mass, float k, float gamma, float r0, float v0) {
+    public DampedOscillator(float mass, float k, float gamma, float r_0, float r1_0) {
         this.mass = mass;
         this.k = k;
         this.gamma = gamma;
-        this.r = r0;
-        this.v = v0;
 
-        rFunction = new FunctionWithDerivatives(this::r);
+        rMap.put(-1, r_0);
+        rMap.put(0, r_0);
 
-        rFunction.setDerivative(0, this::r);
-        rFunction.setDerivative(1, this::r1);
-        rFunction.setDerivative(2, this::r2);
-        rFunction.setDerivative(3, this::r3);
-        rFunction.setDerivative(4, this::r4);
-        rFunction.setDerivative(5, this::r5);
+        r1Map.put(-1, r1_0);
+        r1Map.put(0, r1_0);
+
+        float r2_0 = -k * r_0 / mass - gamma * r1_0 / mass;
+        r2Map.put(-1, r2_0);
+        r2Map.put(0, r2_0);
+
+        float r3_0 = -k * r1_0 / mass - gamma * r2_0 / mass;
+        r3Map.put(-1, r3_0);
+        r3Map.put(0, r3_0);
+
+        float r4_0 = -k * r2_0 / mass - gamma * r3_0 / mass;
+        r4Map.put(-1, r4_0);
+        r4Map.put(0, r4_0);
+
+        float r5_0 = -k * r3_0 / mass - gamma * r4_0 / mass;
+        r5Map.put(-1, r5_0);
+        r5Map.put(0, r5_0);
+
+        rFunction = new FunctionWithDerivatives(getrMap());
+
+        rFunction.setDerivative(1, getR1Map());
+        rFunction.setDerivative(2, getR2Map());
+        rFunction.setDerivative(3, getR3Map());
+        rFunction.setDerivative(4, getR4Map());
+        rFunction.setDerivative(5, getR5Map());
 
         forceFunction = (r, r1) -> -k * r - gamma * r1;
+
+        r3Function = (r1, r2) -> -k * r1 / mass - gamma * r2 / mass;
     }
 
     public BiFunction<Float, Float, Float> getForceFunction() {
         return forceFunction;
     }
 
+    public BiFunction<Float, Float, Float> getR3Function() {
+        return r3Function;
+    }
+
     public FunctionWithDerivatives getrFunction() {
         return rFunction;
     }
 
+    public Map<Integer, Float> getrMap() {
+        return rMap;
+    }
+
+    public Map<Integer, Float> getR1Map() {
+        return r1Map;
+    }
+
+    public Map<Integer, Float> getR2Map() {
+        return r2Map;
+    }
+
+    public Map<Integer, Float> getR3Map() {
+        return r3Map;
+    }
+
+    public Map<Integer, Float> getR4Map() {
+        return r4Map;
+    }
+
+    public Map<Integer, Float> getR5Map() {
+        return r5Map;
+    }
+
     public float getMass() {
         return mass;
-    }
-
-    private float r(float t) {
-        return A * (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.cos(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t);
-    }
-
-    private float r1(float t) {
-        return -gamma / (2 * mass) * A * (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.cos(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) - (float) Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t);
-    }
-
-    private float r2(float t) {
-        return gamma * gamma / (4 * mass * mass) * A * (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.cos(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) - gamma / (2 * mass) * A * (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + k / mass * A * (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t);
-
-    }
-
-    private float r3(float t) {
-        return -gamma * gamma * gamma / (8 * mass * mass * mass) * A * (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.cos(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + gamma * gamma / (4 * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + gamma * k / (2 * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + gamma / (2 * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) *
-                (float) Math.cos(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) - k * k / (mass * mass) * A * (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t);
-
-    }
-
-    private float r4(float t) {
-        return gamma * gamma * gamma * gamma / (16 * mass * mass * mass * mass) * A * (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.cos(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) - gamma * gamma * gamma / (8 * mass * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + gamma * gamma * k / (4 * mass * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + gamma * gamma / (4 * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) *
-                (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) - gamma * k * k / (2 * mass * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.cos(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + k * k * k / (mass * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t);
-    }
-
-    private float r5(float t) {
-        return -gamma * gamma * gamma * gamma * gamma / (32 * mass * mass * mass * mass * mass) * A * (float) Math.exp(-gamma / (2 * mass) * t) *
-                (float) Math.cos(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + gamma * gamma * gamma * gamma / (16 * mass * mass * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) - gamma * gamma * gamma * k / (8 * mass * mass * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + gamma * gamma * k * k / (4 * mass * mass * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) - gamma * k / (4 * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) *
-                (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) + k * k * k / (2 * mass * mass * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.cos(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t) - k * k * k * k / (mass * mass * mass * mass) * A *
-                (float) Math.exp(-gamma / (2 * mass) * t) * (float) Math.sin(Math.sqrt(k / mass - gamma * gamma / (4 * mass * mass)) * t);
     }
 
 
@@ -116,61 +117,65 @@ public class DampedOscillator implements Integrable {
         float r0 = 1; // [m]
         float v0 = -1 * amplitude * gamma / (2 * mass); // [m/s]
 
-        DampedOscillator dampedOscillator = new DampedOscillator(mass, k, gamma,r0, v0);
-
-        float deltaT = 0.01f; // [s]
-        float tf = 5; // [s]
-
-        //Define all three integrators, for each define same oscillator and calculate r and v from 0 to 5s
         Writer writer = new Writer();
-        //Beeman
 
-        float t = 0; // [s]
-        float[] rBeeman = new float[2];
-        rBeeman[0] = r0;
-        rBeeman[1] = v0;
-
-        BufferedWriter bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_beeman.txt", true));
-        writer.writePos(rBeeman[0], bw);
-
-        while (t < tf) {
-            rBeeman = Integrator.beeman(dampedOscillator, t, deltaT);
-            t += deltaT;
-            writer.writePos(rBeeman[0], bw);
+        float[] deltaTs = {0.1f, 0.01f, 0.001f, 0.0001f};
+        int tf = 5; // [s]
+        int[] maxSteps = new int[deltaTs.length];
+        for (int i = 0; i < deltaTs.length; i++) {
+            maxSteps[i] = (int) (tf / deltaTs[i]);
         }
-        bw.close();
 
-        //Original Verlet
-        t = 0; // [s]
-        float[] rVerlet = new float[2];
-        rVerlet[0] = r0;
-        rVerlet[1] = v0;
+        for (int i = 0; i < deltaTs.length; i++) {
+            //Beeman
+            BufferedWriter bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_beeman_" + deltaTs[i] + ".txt", true));
+            DampedOscillator dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0);
+            writer.writePos(dampedOscillator.getrMap().get(0), bw);
+            for (int j = 1; j <= maxSteps[i]; j++) {
+                float[] rBeeman = Integrator.beeman(dampedOscillator, j, deltaTs[i]);
 
-        bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_verlet.txt", true));
-        writer.writePos(rVerlet[0], bw);
+                dampedOscillator.getrMap().put(j , rBeeman[0]);
+                dampedOscillator.getR1Map().put(j , rBeeman[1]);
+                dampedOscillator.getR2Map().put(j, dampedOscillator.getForceFunction().apply(rBeeman[0], rBeeman[1]) / mass);
 
-        while (t < tf) {
-            rVerlet = Integrator.originalVerlet(dampedOscillator, t, deltaT);
-            t += deltaT;
-            writer.writePos(rVerlet[0], bw);
+                writer.writePos(rBeeman[0], bw);
+            }
+            bw.close();
+
+            //Gear Predictor-Corrector
+            bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_gear_" + deltaTs[i] + ".txt", true));
+            dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0);
+            writer.writePos(dampedOscillator.getrMap().get(0), bw);
+            for (int j = 1; j <= maxSteps[i]; j++) {
+                float[] rGear = Integrator.gearPredictorCorrector(5, dampedOscillator, j, deltaTs[i]);
+
+                dampedOscillator.getrMap().put(j, rGear[0]);
+                dampedOscillator.getR1Map().put(j, rGear[1]);
+                dampedOscillator.getR2Map().put(j, rGear[2]);
+                dampedOscillator.getR3Map().put(j, rGear[3]);
+                dampedOscillator.getR4Map().put(j, rGear[4]);
+                dampedOscillator.getR5Map().put(j, rGear[5]);
+
+                writer.writePos(rGear[0], bw);
+            }
+            bw.close();
+
+            //Original Verlet
+            bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_verlet_" + deltaTs[i] + ".txt", true));
+            dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0);
+            writer.writePos(dampedOscillator.getrMap().get(0), bw);
+            for (int j = 1; j <= maxSteps[i]; j++) {
+                float[] rVerlet = Integrator.originalVerlet(dampedOscillator, j, deltaTs[i]);
+
+                dampedOscillator.getrMap().put(j, rVerlet[0]);
+                dampedOscillator.getR1Map().put(j, rVerlet[1]);
+                dampedOscillator.getR2Map().put(j, dampedOscillator.getForceFunction().apply(rVerlet[0], rVerlet[1]) / mass);
+                dampedOscillator.getR3Map().put(j, dampedOscillator.getR3Function().apply(rVerlet[1], dampedOscillator.getR2Map().get(j)) / mass);
+
+                writer.writePos(rVerlet[0], bw);
+            }
+            bw.close();
         }
-        bw.close();
-
-        //Gear Predictor-Corrector
-        t = 0; // [s]
-        float[] rGear = new float[2];
-        rGear[0] = r0;
-        rGear[1] = v0;
-
-        bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_gear.txt", true));
-        writer.writePos(rGear[0], bw);
-
-        while (t < tf) {
-            rGear = Integrator.gearPredictorCorrector(5, dampedOscillator, t, deltaT);
-            t += deltaT;
-            writer.writePos(rGear[0], bw);
-        }
-        bw.close();
 
     }
 }
