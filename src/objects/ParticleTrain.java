@@ -55,24 +55,24 @@ public class ParticleTrain {
                 Particle particle = particles.get(i);
                 Particle ghostParticle = ghostParticles.get(i);
                 float[] r = Integrator.beeman(particle, t, deltaT);
-                particle.setX(r[0]);
-                particle.setVelocityX(r[1]);
-                ghostParticle.setX(r[0] - L);
-                ghostParticle.setVelocityX(r[1]);
+                particle.setX(t, deltaT, r[0]);
+                particle.setVelocityX(t, deltaT, r[1]);
+                ghostParticle.setX(t, deltaT,r[0] - L);
+                ghostParticle.setVelocityX(t, deltaT, r[1]);
 
                 if (particle.getX() > L + particle.getRadius()) {
-                    particle.setX(particle.getX() - L);
-                    ghostParticle.setX(ghostParticle.getX() - L);
+                    particle.setX(t, deltaT,particle.getX() - L);
+                    ghostParticle.setX(t, deltaT,ghostParticle.getX() - L);
                 }
 
             }
 
-            writer.writeStep((int) ((tf - t) / deltaT), particles, ghostParticles, bw);
+            writer.writeStep((int) (t / deltaT), particles, ghostParticles, bw);
         }
     }
 
 
-    public void calculateCollisions() {
+    private void calculateCollisions() {
         // Watch if two particles collide, if they do, add a force, same magnitude, opposite direction to both particles
         // a particle near L could collide with a particle near 0, so we need to check both sides, periodic boundary conditions
         for (int i = 0; i < particles.size(); i++) {
@@ -107,7 +107,7 @@ public class ParticleTrain {
         }
     }
 
-    public boolean collides(Particle particle1, Particle particle2) {
+    private boolean collides(Particle particle1, Particle particle2) {
         return Math.abs(particle1.getX() - particle2.getX()) <= particle1.getRadius() + particle2.getRadius();
     }
 

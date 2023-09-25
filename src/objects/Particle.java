@@ -3,15 +3,15 @@ package objects;
 import functions.FunctionWithDerivatives;
 import functions.Integrable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 
 public class Particle implements Comparable<Particle>, Integrable {
     private final float id;
     private float x; // X-coordinate of the particle
+    private Map<Float, Float> positionMap = new HashMap<>();
     private float velocityX; // X-component of the velocity
+    private Map<Float, Float> velocityMap = new HashMap<>();
     private final float mass; // Mass of the particle
     private final float radius; // Radius of the particle
     private final float limitVelocity;
@@ -53,12 +53,12 @@ public class Particle implements Comparable<Particle>, Integrable {
         addedForces = 0;
     }
 
-    private float r(float t) { //TODO: Preguntar por esta funcion
-        return x;
+    private float r(float t) {
+        return positionMap.getOrDefault(t, x);
     }
 
-    private float r1(float t) { //TODO: Preguntar por esta funcion
-        return velocityX;
+    private float r1(float t) {
+        return velocityMap.getOrDefault(t, velocityX);
     }
 
     private float r2(float t) {
@@ -106,12 +106,16 @@ public class Particle implements Comparable<Particle>, Integrable {
     }
 
 
-    public void setX(float x) {
+    public void setX(float t, float deltaT, float x) {
         this.x = x;
+        positionMap.put(t, x);
+        positionMap.entrySet().removeIf(entry -> entry.getKey() < t - 2*deltaT);
     }
 
-    public void setVelocityX(float velocityX) {
+    public void setVelocityX(float t, float deltaT, float velocityX) {
         this.velocityX = velocityX;
+        velocityMap.put(t, velocityX);
+        velocityMap.entrySet().removeIf(entry -> entry.getKey() < t - 2*deltaT);
     }
 
     public float getId() {
