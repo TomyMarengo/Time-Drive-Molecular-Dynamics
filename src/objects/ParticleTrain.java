@@ -43,9 +43,10 @@ public class ParticleTrain {
     }
 
     public void start() {
+
         for (float t = 0; t <= tf; t += deltaT) {
 
-            System.out.println(t);
+            writer.writeStep(t, particles, ghostParticles, bw);
 
             for (int i = 0; i < particles.size(); i++) {
                 particles.get(i).removeForces();
@@ -69,9 +70,9 @@ public class ParticleTrain {
                 }
 
             }
-
-            writer.writeStep(t, particles, ghostParticles, bw);
         }
+
+        writer.writeStep(tf, particles, ghostParticles, bw);
     }
 
 
