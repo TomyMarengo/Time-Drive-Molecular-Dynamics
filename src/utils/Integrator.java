@@ -37,7 +37,7 @@ public class Integrator {
         float[] rp = new float[order + 1];
         for (int i = 0; i <= order; i++) {
             for (int j = i; j <= order; j++) {
-                rp[i] += r_function.calculateDerivative(j, step - 1) * (float) Math.pow(deltaT, j) / factorial(j);
+                rp[i] += r_function.calculateDerivative(j, step - 1) * (float) Math.pow(deltaT, j - i) / factorial(j - i);
             }
         }
 
