@@ -111,7 +111,7 @@ public class DampedOscillator implements Integrable {
 
         Writer writer = new Writer();
 
-        double[] deltaTs = {0.1f, 0.01f, 0.001f, 0.0001f};
+        double[] deltaTs = {0.01, 0.001, 0.0001, 0.00001};
         int tf = 5; // [s]
         int[] maxSteps = new int[deltaTs.length];
         for (int i = 0; i < deltaTs.length; i++) {
@@ -121,7 +121,7 @@ public class DampedOscillator implements Integrable {
         for (int i = 0; i < deltaTs.length; i++) {
             //Beeman
             DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-            DecimalFormat decimalFormat = new DecimalFormat("#.####", symbols);
+            DecimalFormat decimalFormat = new DecimalFormat("#.######", symbols);
             String formattedDeltaT = decimalFormat.format(deltaTs[i]);
             System.out.println(formattedDeltaT);
 
