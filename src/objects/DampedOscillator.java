@@ -184,7 +184,6 @@ public class DampedOscillator implements Integrable {
                 dampedOscillator.getrMap().put(j, rVerlet[0]);
                 dampedOscillator.getR1Map().put(j, rVerlet[1]);
                 dampedOscillator.getR2Map().put(j, dampedOscillator.getForceFunction().apply(rVerlet[0], rVerlet[1]) / mass);
-                dampedOscillator.getR3Map().put(j, dampedOscillator.getR3Function().apply(rVerlet[1], dampedOscillator.getR2Map().get(j)) / mass);  //TODO: Preguntar
 
                 writer.writePos(rVerlet[0], bw);
             }

@@ -43,7 +43,6 @@ public class ParticleTrain {
                             particle.getTau(), particle.getrMap().get(step) - L, particle.getLimitVelocity())
             );
         }
-
     }
 
 
@@ -152,7 +151,7 @@ public class ParticleTrain {
 
         float[] deltaTs = {0.1f, 0.01f, 0.001f, 0.0001f};
         int[] Ns = {10, 15, 20, 25};
-        int tf = 50; // [s]
+        int tf = 10; // [s]
 
         for (int n : Ns) {
             List<Particle> particles = new ArrayList<>();
