@@ -95,8 +95,8 @@ public class Integrator {
         float[] r = new float[2]; // r and v
 
         r[0] = 2*r_function.calculateDerivative(0, step - 1)
-                - r_function.calculateDerivative(0, step - 1)
-                + r_function.calculateDerivative(2, step - 1) * deltaT * deltaT * model.getMass();
+                - r_function.calculateDerivative(0, step - 2)
+                + r_function.calculateDerivative(2, step - 1) * deltaT * deltaT;
 
         r[1] = (r[0] - r_function.calculateDerivative(0, step - 2)) / (2 * deltaT);
 

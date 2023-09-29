@@ -27,9 +27,6 @@ public class DampedOscillator implements Integrable {
 
     private final FunctionWithDerivatives rFunction;
     private final BiFunction<Float, Float, Float> forceFunction;
-    private final BiFunction<Float, Float, Float> r3Function;
-    private final BiFunction<Float, Float, Float> r4Function;
-    private final BiFunction<Float, Float, Float> r5Function;
 
     public DampedOscillator(float mass, float k, float gamma, float r_0, float r1_0) {
         this.mass = mass;
@@ -46,12 +43,6 @@ public class DampedOscillator implements Integrable {
 
         forceFunction = (r, r1) -> -k * r - gamma * r1;
 
-        r3Function = (r1, r2) -> (-k * r1 - gamma * r2) / mass;
-
-        r4Function = (r2, r3) -> (-k * r2 - gamma * r3) / mass;
-
-        r5Function = (r3, r4) -> (-k * r3 - gamma * r4) / mass;
-
         rMap.put(-1, r_0);
         rMap.put(0, r_0);
 
@@ -61,30 +52,18 @@ public class DampedOscillator implements Integrable {
         r2Map.put(-1, forceFunction.apply(r_0, r1_0) / mass);
         r2Map.put(0, forceFunction.apply(r_0, r1_0) / mass);
 
-        r3Map.put(-1, r3Function.apply(r1_0, r2Map.get(0)));
-        r3Map.put(0, r3Function.apply(r1_0, r2Map.get(0)));
+        r3Map.put(-1, 0f);
+        r3Map.put(0, 0f);
 
-        r4Map.put(-1, r4Function.apply(r2Map.get(0), r3Map.get(0)));
-        r4Map.put(0, r4Function.apply(r2Map.get(0), r3Map.get(0)));
+        r4Map.put(-1, 0f);
+        r4Map.put(0, 0f);
 
-        r5Map.put(-1, r5Function.apply(r3Map.get(0), r4Map.get(0)));
-        r5Map.put(0, r5Function.apply(r3Map.get(0), r4Map.get(0)));
+        r5Map.put(-1, 0f);
+        r5Map.put(0, 0f);
     }
 
     public BiFunction<Float, Float, Float> getForceFunction() {
         return forceFunction;
-    }
-
-    public BiFunction<Float, Float, Float> getR3Function() {
-        return r3Function;
-    }
-
-    public BiFunction<Float, Float, Float> getR4Function() {
-        return r4Function;
-    }
-
-    public BiFunction<Float, Float, Float> getR5Function() {
-        return r5Function;
     }
 
     public FunctionWithDerivatives getrFunction() {
@@ -139,8 +118,9 @@ public class DampedOscillator implements Integrable {
 
         for (int i = 0; i < deltaTs.length; i++) {
             //Beeman
-            DecimalFormat decimalFormat = new DecimalFormat("#.####");
+            DecimalFormat decimalFormat = new DecimalFormat("#.####", );
             String formattedDeltaT = decimalFormat.format(deltaTs[i]);
+            System.out.println(formattedDeltaT);
 
             BufferedWriter bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_beeman_" + formattedDeltaT + ".txt", true));
             DampedOscillator dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0);
