@@ -96,7 +96,7 @@ public class Integrator {
 
         r[0] = 2*r_function.calculateDerivative(0, step - 1)
                 - r_function.calculateDerivative(0, step - 2)
-                + r_function.calculateDerivative(2, step - 1) * deltaT * deltaT;
+                + force_function.apply(r_function.calculateDerivative(0, step - 1), r_function.calculateDerivative(1, step - 2)) * deltaT * deltaT / model.getMass();
 
         r[1] = (r[0] - r_function.calculateDerivative(0, step - 2)) / (2 * deltaT);
 
