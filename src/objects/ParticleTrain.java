@@ -69,15 +69,21 @@ public class ParticleTrain {
                     ghostParticle.getrMap().put(step - 1, particle.getrMap().get(step - 1) - L);
                 }
 
-                float[] rBeeman = Integrator.beeman(particle, step, deltaT);
-                particle.getrMap().put(step, rBeeman[0]);
-                particle.getR1Map().put(step, rBeeman[1]);
-                particle.getR2Map().put(j, particle.getForceFunction().apply(rBeeman[0], rBeeman[1]) / particle.getMass());
+                float[] rGear = Integrator.gearPredictorCorrector(5, particle, step, deltaT);
+                particle.getrMap().put(step, rGear[0]);
+                particle.getR1Map().put(step, rGear[1]);
+                particle.getR2Map().put(step, rGear[2]);
+                particle.getR3Map().put(step, rGear[3]);
+                particle.getR4Map().put(step, rGear[4]);
+                particle.getR5Map().put(step, rGear[5]);
 
-                rBeeman = Integrator.beeman(ghostParticle, step, deltaT);
-                ghostParticle.getrMap().put(step, rBeeman[0]);
-                ghostParticle.getR1Map().put(step, rBeeman[1]);
-                ghostParticle.getR2Map().put(j, ghostParticle.getForceFunction().apply(rBeeman[0], rBeeman[1]) / ghostParticle.getMass());
+                rGear = Integrator.gearPredictorCorrector(5, ghostParticle, step, deltaT);
+                ghostParticle.getrMap().put(step, rGear[0]);
+                ghostParticle.getR1Map().put(step, rGear[1]);
+                ghostParticle.getR2Map().put(step, rGear[2]);
+                ghostParticle.getR3Map().put(step, rGear[3]);
+                ghostParticle.getR4Map().put(step, rGear[4]);
+                ghostParticle.getR5Map().put(step, rGear[5]);
 
             }
 

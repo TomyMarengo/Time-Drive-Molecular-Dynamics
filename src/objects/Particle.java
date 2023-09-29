@@ -48,15 +48,15 @@ public class Particle implements Integrable {
         r2Map.put(-1, r2_0);
         r2Map.put(0, r2_0);
 
-        float r3_0 = 0;  // TODO: Preguntar que funcion tiene
+        float r3_0 = 0;
         r3Map.put(-1, r3_0);
         r3Map.put(0, r3_0);
 
-        float r4_0 = 0; // TODO: Preguntar que funcion tiene
+        float r4_0 = 0;
         r4Map.put(-1, r4_0);
         r4Map.put(0, r4_0);
 
-        float r5_0 = 0; // TODO: Preguntar que funcion tiene
+        float r5_0 = 0;
         r5Map.put(-1, r5_0);
         r5Map.put(0, r5_0);
     }
