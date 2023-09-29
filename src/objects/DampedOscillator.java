@@ -16,21 +16,21 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 public class DampedOscillator implements Integrable {
-    private final float mass; // [kg]
-    private final float k; // [N/m]
-    private final float gamma; // [kg/s]
-    private final float A = 1; // [m]
-    private Map<Integer, Float> rMap = new HashMap<>();
-    private Map<Integer, Float> r1Map = new HashMap<>();
-    private Map<Integer, Float> r2Map = new HashMap<>();
-    private Map<Integer, Float> r3Map = new HashMap<>();
-    private Map<Integer, Float> r4Map = new HashMap<>();
-    private Map<Integer, Float> r5Map = new HashMap<>();
+    private final double mass; // [kg]
+    private final double k; // [N/m]
+    private final double gamma; // [kg/s]
+    private final double A = 1; // [m]
+    private Map<Integer, Double> rMap = new HashMap<>();
+    private Map<Integer, Double> r1Map = new HashMap<>();
+    private Map<Integer, Double> r2Map = new HashMap<>();
+    private Map<Integer, Double> r3Map = new HashMap<>();
+    private Map<Integer, Double> r4Map = new HashMap<>();
+    private Map<Integer, Double> r5Map = new HashMap<>();
 
     private final FunctionWithDerivatives rFunction;
-    private final BiFunction<Float, Float, Float> forceFunction;
+    private final BiFunction<Double, Double, Double> forceFunction;
 
-    public DampedOscillator(float mass, float k, float gamma, float r_0, float r1_0) {
+    public DampedOscillator(double mass, double k, double gamma, double r_0, double r1_0) {
         this.mass = mass;
         this.k = k;
         this.gamma = gamma;
@@ -54,17 +54,17 @@ public class DampedOscillator implements Integrable {
         r2Map.put(-1, forceFunction.apply(r_0, r1_0) / mass);
         r2Map.put(0, forceFunction.apply(r_0, r1_0) / mass);
 
-        r3Map.put(-1, 0f);
-        r3Map.put(0, 0f);
+        r3Map.put(-1, 0.0);
+        r3Map.put(0, 0.0);
 
-        r4Map.put(-1, 0f);
-        r4Map.put(0, 0f);
+        r4Map.put(-1, 0.0);
+        r4Map.put(0, 0.0);
 
-        r5Map.put(-1, 0f);
-        r5Map.put(0, 0f);
+        r5Map.put(-1, 0.0);
+        r5Map.put(0, 0.0);
     }
 
-    public BiFunction<Float, Float, Float> getForceFunction() {
+    public BiFunction<Double, Double, Double> getForceFunction() {
         return forceFunction;
     }
 
@@ -72,46 +72,46 @@ public class DampedOscillator implements Integrable {
         return rFunction;
     }
 
-    public Map<Integer, Float> getrMap() {
+    public Map<Integer, Double> getrMap() {
         return rMap;
     }
 
-    public Map<Integer, Float> getR1Map() {
+    public Map<Integer, Double> getR1Map() {
         return r1Map;
     }
 
-    public Map<Integer, Float> getR2Map() {
+    public Map<Integer, Double> getR2Map() {
         return r2Map;
     }
 
-    public Map<Integer, Float> getR3Map() {
+    public Map<Integer, Double> getR3Map() {
         return r3Map;
     }
 
-    public Map<Integer, Float> getR4Map() {
+    public Map<Integer, Double> getR4Map() {
         return r4Map;
     }
 
-    public Map<Integer, Float> getR5Map() {
+    public Map<Integer, Double> getR5Map() {
         return r5Map;
     }
 
-    public float getMass() {
+    public double getMass() {
         return mass;
     }
 
 
     public static void main(String[] args) throws IOException {
-        float mass = 70; // [kg]
-        float k = 10000; // [N/m]
-        float gamma = 100; // [kg/s]
-        float amplitude = 1; // [m]
-        float r0 = 1; // [m]
-        float v0 = -1 * amplitude * gamma / (2 * mass); // [m/s]
+        double mass = 70; // [kg]
+        double k = 10000; // [N/m]
+        double gamma = 100; // [kg/s]
+        double amplitude = 1; // [m]
+        double r0 = 1; // [m]
+        double v0 = -1 * amplitude * gamma / (2 * mass); // [m/s]
 
         Writer writer = new Writer();
 
-        float[] deltaTs = {0.1f, 0.01f, 0.001f, 0.0001f};
+        double[] deltaTs = {0.1f, 0.01f, 0.001f, 0.0001f};
         int tf = 5; // [s]
         int[] maxSteps = new int[deltaTs.length];
         for (int i = 0; i < deltaTs.length; i++) {
@@ -129,7 +129,7 @@ public class DampedOscillator implements Integrable {
             DampedOscillator dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0);
             writer.writePos(dampedOscillator.getrMap().get(0), bw);
             for (int j = 1; j <= maxSteps[i]; j++) {
-                float[] rBeeman = Integrator.beeman(dampedOscillator, j, deltaTs[i]);
+                double[] rBeeman = Integrator.beeman(dampedOscillator, j, deltaTs[i]);
 
                 dampedOscillator.getrMap().put(j , rBeeman[0]);
                 dampedOscillator.getR1Map().put(j , rBeeman[1]);
@@ -144,7 +144,7 @@ public class DampedOscillator implements Integrable {
             dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0);
             writer.writePos(dampedOscillator.getrMap().get(0), bw);
             for (int j = 1; j <= maxSteps[i]; j++) {
-                float[] rGear = Integrator.gearPredictorCorrector(5, dampedOscillator, j, deltaTs[i]);
+                double[] rGear = Integrator.gearPredictorCorrector(5, dampedOscillator, j, deltaTs[i]);
 
                 dampedOscillator.getrMap().put(j, rGear[0]);
                 dampedOscillator.getR1Map().put(j, rGear[1]);
@@ -162,7 +162,7 @@ public class DampedOscillator implements Integrable {
             dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0);
             writer.writePos(dampedOscillator.getrMap().get(0), bw);
             for (int j = 1; j <= maxSteps[i]; j++) {
-                float[] rVerlet = Integrator.originalVerlet(dampedOscillator, j, deltaTs[i]);
+                double[] rVerlet = Integrator.originalVerlet(dampedOscillator, j, deltaTs[i]);
 
                 dampedOscillator.getrMap().put(j, rVerlet[0]);
                 dampedOscillator.getR1Map().put(j, rVerlet[1]);

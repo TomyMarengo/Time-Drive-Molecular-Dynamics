@@ -12,15 +12,15 @@ public class ParticleTrain {
     private final BufferedWriter bw;
     private final List<Particle> particles;
     private final List<Particle> ghostParticles;
-    private final float deltaT;
-    private final float tf;
-    private final float L;
-    private final float k = 2.5f; //  [kg/(s^2)]
+    private final double deltaT;
+    private final double tf;
+    private final double L;
+    private final double k = 2.5; //  [kg/(s^2)]
     private final int maxStep;
     private int step = 0;
 
 
-    public ParticleTrain(List<Particle> particles, float deltaT, float tf, float L) {
+    public ParticleTrain(List<Particle> particles, double deltaT, double tf, double L) {
         this.particles = particles;
         this.deltaT = deltaT;
         this.tf = tf;
@@ -69,7 +69,7 @@ public class ParticleTrain {
                     ghostParticle.getrMap().put(step - 1, particle.getrMap().get(step - 1) - L);
                 }
 
-                float[] rGear = Integrator.gearPredictorCorrector(5, particle, step, deltaT);
+                double[] rGear = Integrator.gearPredictorCorrector(5, particle, step, deltaT);
                 particle.getrMap().put(step, rGear[0]);
                 particle.getR1Map().put(step, rGear[1]);
                 particle.getR2Map().put(step, rGear[2]);
@@ -113,7 +113,7 @@ public class ParticleTrain {
                 Particle ghostParticle2 = ghostParticles.get(j);
                 
 
-                float force = 0;
+                double force = 0;
                 if (collides(particle1, particle2)) {
                     force = k * (Math.abs(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1))
                             - (particle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1));
@@ -148,14 +148,14 @@ public class ParticleTrain {
     public static void main(String[] args) {
 
         /* Constants */
-        float r = 0.0225f; // [m]
-        float m = 0.025f; // [kg]
-        float L = 1.35f; // [m]
-        float tau = 1; // [s]
+        double r = 0.0225; // [m]
+        double m = 0.025; // [kg]
+        double L = 1.35; // [m]
+        double tau = 1; // [s]
 
         Random random = new Random();
 
-        float[] deltaTs = {0.1f, 0.01f, 0.001f, 0.0001f};
+        double[] deltaTs = {0.1f, 0.01f, 0.001f, 0.0001f};
         int[] Ns = {10, 15, 20, 25};
         int tf = 10; // [s]
 
@@ -163,11 +163,11 @@ public class ParticleTrain {
             List<Particle> particles = new ArrayList<>();
 
             // Initilize particles
-            float[] xs = new float[n];
+            double[] xs = new double[n];
             for (int i = 0; i < n; i++) {
                 xs[i] = i * L / n;
             }
-            float[] taken = new float[n];
+            double[] taken = new double[n];
 
             for (int i = 0; i < n; i++) {
                 // random x between xs[0] and xs[N-1], if it's already taken, try again
@@ -176,13 +176,13 @@ public class ParticleTrain {
                     index = random.nextInt(n);
                 }
                 taken[index] = 1;
-                float x = xs[index];
-                float limitVelocity = random.nextFloat() * 0.03f + 0.09f; // [9-12] [cm/s]
+                double x = xs[index];
+                double limitVelocity = random.nextDouble() * 0.03f + 0.09; // [9-12] [cm/s]
 
                 particles.add(new Particle(m, r, limitVelocity, tau, x, limitVelocity));
             }
 
-            for (float deltaT : deltaTs) {
+            for (double deltaT : deltaTs) {
                 ParticleTrain particleTrain = new ParticleTrain(particles, deltaT, tf, L);
                 particleTrain.start();
             }

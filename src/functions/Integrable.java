@@ -4,7 +4,7 @@ import java.util.function.BiFunction;
 
 public interface Integrable {
 
-    BiFunction<Float, Float, Float>  getForceFunction();
+    BiFunction<Double, Double, Double>  getForceFunction();
     FunctionWithDerivatives getrFunction();
-    float getMass();
+    double getMass();
 }

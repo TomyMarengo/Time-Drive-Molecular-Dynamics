@@ -7,22 +7,22 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 public class Particle implements Integrable {
-    private final float mass; // Mass of the particle
-    private final float radius; // Radius of the particle
-    private final float limitVelocity;
-    private final float tau;
-    private Map<Integer, Float> rMap = new HashMap<>();
-    private Map<Integer, Float> r1Map = new HashMap<>();
-    private Map<Integer, Float> r2Map = new HashMap<>();
-    private Map<Integer, Float> r3Map = new HashMap<>();
-    private Map<Integer, Float> r4Map = new HashMap<>();
-    private Map<Integer, Float> r5Map = new HashMap<>();
-    private float addedForces = 0;
+    private final double mass; // Mass of the particle
+    private final double radius; // Radius of the particle
+    private final double limitVelocity;
+    private final double tau;
+    private Map<Integer, Double> rMap = new HashMap<>();
+    private Map<Integer, Double> r1Map = new HashMap<>();
+    private Map<Integer, Double> r2Map = new HashMap<>();
+    private Map<Integer, Double> r3Map = new HashMap<>();
+    private Map<Integer, Double> r4Map = new HashMap<>();
+    private Map<Integer, Double> r5Map = new HashMap<>();
+    private double addedForces = 0;
     private final FunctionWithDerivatives rFunction;
-    private final BiFunction<Float, Float, Float> forceFunction;
+    private final BiFunction<Double, Double, Double> forceFunction;
 
 
-    public Particle(float mass, float radius, float limitVelocity, float tau, float r_0, float r1_0) {
+    public Particle(double mass, double radius, double limitVelocity, double tau, double r_0, double r1_0) {
         this.mass = mass;
         this.radius = radius;
         this.limitVelocity = limitVelocity;
@@ -44,25 +44,25 @@ public class Particle implements Integrable {
         r1Map.put(-1, r1_0);
         r1Map.put(0, r1_0);
 
-        float r2_0 = getForceFunction().apply(r_0, r1_0) / mass;
+        double r2_0 = getForceFunction().apply(r_0, r1_0) / mass;
         r2Map.put(-1, r2_0);
         r2Map.put(0, r2_0);
 
-        float r3_0 = 0;
+        double r3_0 = 0;
         r3Map.put(-1, r3_0);
         r3Map.put(0, r3_0);
 
-        float r4_0 = 0;
+        double r4_0 = 0;
         r4Map.put(-1, r4_0);
         r4Map.put(0, r4_0);
 
-        float r5_0 = 0;
+        double r5_0 = 0;
         r5Map.put(-1, r5_0);
         r5Map.put(0, r5_0);
     }
 
     @Override
-    public BiFunction<Float, Float, Float> getForceFunction() {
+    public BiFunction<Double, Double, Double> getForceFunction() {
         return forceFunction;
     }
 
@@ -71,7 +71,7 @@ public class Particle implements Integrable {
         return rFunction;
     }
 
-    public void addForce(float force) {
+    public void addForce(double force) {
         addedForces += force;
     }
 
@@ -79,44 +79,44 @@ public class Particle implements Integrable {
         addedForces = 0;
     }
 
-    public Map<Integer, Float> getrMap() {
+    public Map<Integer, Double> getrMap() {
         return rMap;
     }
 
-    public Map<Integer, Float> getR1Map() {
+    public Map<Integer, Double> getR1Map() {
         return r1Map;
     }
 
-    public Map<Integer, Float> getR2Map() {
+    public Map<Integer, Double> getR2Map() {
         return r2Map;
     }
 
-    public Map<Integer, Float> getR3Map() {
+    public Map<Integer, Double> getR3Map() {
         return r3Map;
     }
 
-    public Map<Integer, Float> getR4Map() {
+    public Map<Integer, Double> getR4Map() {
         return r4Map;
     }
 
-    public Map<Integer, Float> getR5Map() {
+    public Map<Integer, Double> getR5Map() {
         return r5Map;
     }
 
-    public float getRadius() {
+    public double getRadius() {
         return radius;
     }
 
     @Override
-    public float getMass() {
+    public double getMass() {
         return mass;
     }
 
-    public float getLimitVelocity() {
+    public double getLimitVelocity() {
         return limitVelocity;
     }
 
-    public float getTau() {
+    public double getTau() {
         return tau;
     }
 }

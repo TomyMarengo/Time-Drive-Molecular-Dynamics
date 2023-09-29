@@ -8,7 +8,7 @@ import objects.Particle;
 
 public class Writer {
 
-    public void writePos(float pos, BufferedWriter writer) {
+    public void writePos(double pos, BufferedWriter writer) {
         try {
             writer.write(pos + "\n");
         } catch (IOException e) {
@@ -16,7 +16,7 @@ public class Writer {
         }
     }
 
-    public void writeStep(float time, int step, List<Particle> particles, List<Particle> ghostParticles, BufferedWriter writer)  {
+    public void writeStep(double time, int step, List<Particle> particles, List<Particle> ghostParticles, BufferedWriter writer)  {
         try {
             writer.write("Time " + time + "\n");
 
