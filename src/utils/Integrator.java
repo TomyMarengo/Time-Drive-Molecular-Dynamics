@@ -37,7 +37,7 @@ public class Integrator {
         double[] rp = new double[order + 1];
         for (int i = 0; i <= order; i++) {
             for (int j = i; j <= order; j++) {
-                rp[i] += r_function.calculateDerivative(j, step - 1) * (double) Math.pow(deltaT, j - i) / factorial(j - i);
+                rp[i] = rp[i] + r_function.calculateDerivative(j, step - 1) * Math.pow(deltaT, j - i) / factorial(j - i);
             }
         }
 
@@ -51,7 +51,7 @@ public class Integrator {
         double[] r = new double[order + 1];
 
         for (int i = 0; i <= order; i++) { //Only r and v
-            r[i] = rp[i] + coefficents[order][i] * deltaR2 * factorial(i) / (double) Math.pow(deltaT, i);
+            r[i] = rp[i] + coefficents[order][i] * deltaR2 * factorial(i) / Math.pow(deltaT, i);
         }
 
         return r;
@@ -69,17 +69,17 @@ public class Integrator {
 
         r[0] = r_function.calculateDerivative(0, step - 1)
                 + r_function.calculateDerivative(1, step - 1) * deltaT
-                + 2f / 3f * r_function.calculateDerivative(2, step - 1) * deltaT * deltaT
-                - 1f / 6f * r_function.calculateDerivative(2, step - 2) * deltaT * deltaT;
+                + 2.0 * r_function.calculateDerivative(2, step - 1) * deltaT * deltaT / 3.0
+                - 1.0 * r_function.calculateDerivative(2, step - 2) * deltaT * deltaT / 6.0;
 
         double vp = r_function.calculateDerivative(1, step - 1)
-                + 3f / 2f * r_function.calculateDerivative(2, step - 1) * deltaT
-                - 1f / 2f * r_function.calculateDerivative(2, step - 2) * deltaT;
+                + 3.0 * r_function.calculateDerivative(2, step - 1) * deltaT / 2.0
+                - 1.0 * r_function.calculateDerivative(2, step - 2) * deltaT / 2.0;
 
         r[1] = r_function.calculateDerivative(1, step - 1)
-                + 5f / 12f * force_function.apply(r[0], vp) / mass * deltaT
-                + 2f / 3f * r_function.calculateDerivative(2, step - 1) * deltaT
-                - 1f / 12f * r_function.calculateDerivative(2, step - 2) * deltaT;
+                + 1.0 * force_function.apply(r[0], vp) * deltaT / ( 3.0 * mass)
+                + 5.0 * r_function.calculateDerivative(2, step - 1) * deltaT / 6.0
+                - 1.0 * r_function.calculateDerivative(2, step - 2) * deltaT / 12.0;
 
         return r;
     }
@@ -94,7 +94,7 @@ public class Integrator {
 
         double[] r = new double[2]; // r and v
 
-        r[0] = 2*r_function.calculateDerivative(0, step - 1)
+        r[0] = 2.0 * r_function.calculateDerivative(0, step - 1)
                 - r_function.calculateDerivative(0, step - 2)
                 + force_function.apply(r_function.calculateDerivative(0, step - 1), r_function.calculateDerivative(1, step - 2)) * deltaT * deltaT / model.getMass();
 

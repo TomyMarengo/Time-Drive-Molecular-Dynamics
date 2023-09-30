@@ -61,8 +61,8 @@ public class DampedOscillator implements Integrable {
         r1Map.put(-1, r1_0 - deltaT * forceFunction.apply(r_0, r1_0) / mass);
         r1Map.put(0, r1_0);
 
-        r2Map.put(-1, forceFunction.apply(r_0, r1_0) / mass);
-        r2Map.put(0, forceFunction.apply(r_0, r1_0) / mass);
+        r2Map.put(-1, forceFunction.apply(rMap.get(-1), r1Map.get(-1)) / mass);
+        r2Map.put(0, forceFunction.apply(rMap.get(0), r1Map.get(0)) / mass);
 
         r3Map.put(-1, r3Function.apply(r1Map.get(-1), r2Map.get(-1)));
         r3Map.put(0, r3Function.apply(r1Map.get(0), r2Map.get(0)));
