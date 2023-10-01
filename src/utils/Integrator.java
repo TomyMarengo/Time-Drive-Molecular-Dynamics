@@ -79,7 +79,7 @@ public class Integrator {
         r[1] = r_function.calculateDerivative(1, step - 1)
                 + 1.0 * force_function.apply(r[0], vp) * deltaT / ( 3.0 * mass)
                 + 5.0 * r_function.calculateDerivative(2, step - 1) * deltaT / 6.0
-                - 1.0 * r_function.calculateDerivative(2, step - 2) * deltaT / 12.0;
+                - 1.0 * r_function.calculateDerivative(2, step - 2) * deltaT / 6.0;
 
         return r;
     }

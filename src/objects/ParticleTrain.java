@@ -107,8 +107,9 @@ public class ParticleTrain {
         return Math.abs(particle1.getrMap().get(step - 1) - particle2.getrMap().get(step - 1)) <= (particle1.getRadius() + particle2.getRadius());
     }
 
+    /*
     public static void main(String[] args) {
-        /* Constants */
+        // Constants
         double r = 0.0225; // [m]
         double m = 0.025; // [kg]
         double L = 1.35; // [m]
@@ -148,6 +149,43 @@ public class ParticleTrain {
                 particleTrain.start();
             }
         }
+    }*/
 
+    // Orderer ASC
+    public static void main(String[] args) {
+        // Constants
+        double r = 0.0225; // [m]
+        double m = 0.025; // [kg]
+        double L = 1.35; // [m]
+        double tau = 1; // [s]
+
+        Random random = new Random();
+
+        double[] deltaTs = {0.001};
+        int[] Ns = {5, 10, 15, 20, 25, 30};
+        int tf = 180; // [s]
+
+        for (int n : Ns) {
+            List<Particle> particles = new ArrayList<>();
+
+            // Initilize particles
+            double[] xs = new double[n];
+            double[] limitVelocities = new double[n];
+            for (int i = 0; i < n; i++) {
+                xs[i] = i * L / n;
+                limitVelocities[i] = random.nextDouble() * 0.03 + 0.09; // [9-12] [cm/s]
+            }
+            // sort limitVelocities ASC
+            Arrays.sort(limitVelocities);
+
+            for (int i = 0; i < n; i++) {
+                particles.add(new Particle(m, r, limitVelocities[i], tau, xs[i], limitVelocities[i]));
+            }
+
+            for (double deltaT : deltaTs) {
+                ParticleTrain particleTrain = new ParticleTrain(particles, deltaT, tf, L);
+                particleTrain.start();
+            }
+        }
     }
 }

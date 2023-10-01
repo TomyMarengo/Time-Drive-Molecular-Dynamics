@@ -133,7 +133,7 @@ public class DampedOscillator implements Integrable {
 
         Writer writer = new Writer();
 
-        double[] deltaTs = {0.01, 0.001, 0.0001, 0.00001};
+        double[] deltaTs = {0.01, 0.001, 0.0001, 0.00001, 0.000001};
         int tf = 5; // [s]
         int[] maxSteps = new int[deltaTs.length];
         for (int i = 0; i < deltaTs.length; i++) {
@@ -145,9 +145,8 @@ public class DampedOscillator implements Integrable {
             DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
             DecimalFormat decimalFormat = new DecimalFormat("#.######", symbols);
             String formattedDeltaT = decimalFormat.format(deltaTs[i]);
-            System.out.println(formattedDeltaT);
 
-            BufferedWriter bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_beeman_" + formattedDeltaT + ".txt", true));
+            BufferedWriter bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscillator_beeman_" + formattedDeltaT + ".txt", true));
             DampedOscillator dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0, deltaTs[i]);
             writer.writePos(dampedOscillator.getrMap().get(0), bw);
             for (int j = 1; j <= maxSteps[i]; j++) {
@@ -162,7 +161,7 @@ public class DampedOscillator implements Integrable {
             bw.close();
 
             //Gear Predictor-Corrector
-            bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_gear_" + formattedDeltaT + ".txt", true));
+            bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscillator_gear_" + formattedDeltaT + ".txt", true));
             dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0, deltaTs[i]);
             writer.writePos(dampedOscillator.getrMap().get(0), bw);
             for (int j = 1; j <= maxSteps[i]; j++) {
@@ -180,7 +179,7 @@ public class DampedOscillator implements Integrable {
             bw.close();
 
             //Original Verlet
-            bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscilator_verlet_" + formattedDeltaT + ".txt", true));
+            bw = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/oscillator_verlet_" + formattedDeltaT + ".txt", true));
             dampedOscillator = new DampedOscillator(mass, k, gamma, r0, v0, deltaTs[i]);
             writer.writePos(dampedOscillator.getrMap().get(0), bw);
             for (int j = 1; j <= maxSteps[i]; j++) {
