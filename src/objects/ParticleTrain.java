@@ -88,17 +88,17 @@ public class ParticleTrain {
         // a particle near L could collide with a particle near 0, so we need to check both sides, periodic boundary conditions
         for (int i = 0; i < particles.size(); i++) {
             Particle particle1 = particles.get(i);
-
             for (int j = i + 1; j < particles.size(); j++) {
                 Particle particle2 = particles.get(j);
 
-                double force = 0;
+
                 if (collides(particle1, particle2)) {
-                    force = k * (Math.abs(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1))
+                    double force = k * (Math.abs(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1))
                             - (particle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1));
+                    particle1.addForce(force);
+                    particle2.addForce(-force);
                 }
-                particle1.addForce(force);
-                particle2.addForce(-force);
+
             }
         }
     }
@@ -138,7 +138,7 @@ public class ParticleTrain {
                 }
                 taken[index] = 1;
                 double x = xs[index];
-                double limitVelocity = random.nextDouble() * 0.03f + 0.09; // [9-12] [cm/s]
+                double limitVelocity = random.nextDouble() * 0.03 + 0.09; // [9-12] [cm/s]
 
                 particles.add(new Particle(m, r, limitVelocity, tau, x, limitVelocity));
             }
