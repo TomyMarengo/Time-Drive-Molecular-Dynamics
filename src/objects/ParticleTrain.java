@@ -1,11 +1,14 @@
 package objects;
 
+import functions.FunctionWithDerivatives;
+import functions.Integrable;
 import utils.Integrator;
 import utils.Writer;
 
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.BiFunction;
 
 public class ParticleTrain {
     private final List<Particle> particles;
@@ -26,7 +29,7 @@ public class ParticleTrain {
         this.particles = new ArrayList<>();
         for (Particle particle : particles) {
             this.particles.add(new Particle(particle.getMass(), particle.getRadius(), particle.getLimitVelocity(),
-                    particle.getTau(), particle.getrMap().get(step), particle.getLimitVelocity(), deltaT));
+                    particle.getTau(), particle.getR(), particle.getLimitVelocity(), deltaT));
         }
     }
 
@@ -39,7 +42,7 @@ public class ParticleTrain {
 
             writer.write("Time " + step * deltaT + "\n");
             for (Particle particle : particles) {
-                writer.write(particle.getrMap().get(step) + " " + particle.getR1Map().get(step) + "\n");
+                writer.write(particle.getR() + " " + particle.getR1() + "\n");
             }
             writer.write("\n");
             writer.close();
@@ -57,24 +60,14 @@ public class ParticleTrain {
             this.step = j;
 
             for (Particle particle : particles) {
-                particle.removeForces();
+                if (particle.getR() > L) {
+                    particle.setR(particle.getR() - L);
+                }
+
+                particle.getNextBeeman();
             }
 
             calculateCollisions();
-
-            for (Particle particle : particles) {
-                if (particle.getrMap().get(step - 1) > L) {
-                    particle.getrMap().put(step - 1, particle.getrMap().get(step - 1) - L);
-                }
-
-                double[] rBeeman = Integrator.beeman(particle, step, deltaT);
-
-                particle.getrMap().put(step , rBeeman[0]);
-                particle.getR1Map().put(step , rBeeman[1]);
-                particle.getR2Map().put(step, particle.getForceFunction().apply(rBeeman[0], rBeeman[1]) / particle.getMass());
-
-                particle.cleanMaps(step);
-            }
 
             if (deltaT >= 0.1 || (step % ((int) (1 / deltaT)) == 0)) {
                 writeOutputStep();
@@ -91,12 +84,10 @@ public class ParticleTrain {
             for (int j = i + 1; j < particles.size(); j++) {
                 Particle particle2 = particles.get(j);
 
-
                 if (collides(particle1, particle2)) {
-                    double force = k * (Math.abs(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1))
-                            - (particle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1));
+                    double force = k * (Math.abs(particle2.getR() - particle1.getR()) - (particle1.getRadius() + particle2.getRadius()))
+                            * Math.signum(particle2.getR() - particle1.getR());
                     particle1.addForce(force);
-                    particle2.addForce(-force);
                 }
 
             }
@@ -104,10 +95,10 @@ public class ParticleTrain {
     }
 
     private boolean collides(Particle particle1, Particle particle2) {
-        return Math.abs(particle1.getrMap().get(step - 1) - particle2.getrMap().get(step - 1)) <= (particle1.getRadius() + particle2.getRadius());
+        return Math.abs(particle1.getR() - particle2.getR()) <= (particle1.getRadius() + particle2.getRadius());
     }
 
-    /*
+
     public static void main(String[] args) {
         // Constants
         double r = 0.0225; // [m]
@@ -117,7 +108,7 @@ public class ParticleTrain {
 
         Random random = new Random();
 
-        double[] deltaTs = {0.001};
+        double[] deltaTs = {0.0001};
         int[] Ns = {5, 10, 15, 20, 25, 30};
         int tf = 180; // [s]
 
@@ -149,8 +140,9 @@ public class ParticleTrain {
                 particleTrain.start();
             }
         }
-    }*/
+    }
 
+    /*
     // Orderer ASC
     public static void main(String[] args) {
         // Constants
@@ -187,5 +179,5 @@ public class ParticleTrain {
                 particleTrain.start();
             }
         }
-    }
+    }*/
 }

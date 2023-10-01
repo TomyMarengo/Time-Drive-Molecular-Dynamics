@@ -134,11 +134,7 @@ public class DampedOscillator implements Integrable {
         Writer writer = new Writer();
 
         double[] deltaTs = {0.01, 0.001, 0.0001, 0.00001, 0.000001};
-        int tf = 5; // [s]
-        int[] maxSteps = new int[deltaTs.length];
-        for (int i = 0; i < deltaTs.length; i++) {
-            maxSteps[i] = (int) (tf / deltaTs[i]);
-        }
+        int[] maxSteps = {500, 5000, 50000, 500000, 5000000}; // tf / deltaT (5s)
 
         for (int i = 0; i < deltaTs.length; i++) {
             //Beeman
