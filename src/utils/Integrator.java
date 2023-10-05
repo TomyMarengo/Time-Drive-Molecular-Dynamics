@@ -6,7 +6,7 @@ import functions.Integrable;
 import java.util.function.BiFunction;
 
 public class Integrator {
-    private static long factorial(int number) {
+    public static long factorial(int number) {
         long result = 1;
 
         for (int factor = 2; factor <= number; factor++) {

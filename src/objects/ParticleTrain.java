@@ -15,7 +15,7 @@ public class ParticleTrain {
     private final double deltaT;
     private final double tf;
     private final double L;
-    private final double k = 2.5; //  [kg/(s^2)]
+    private final double k = 2500; //  [g/(s^2)]
     private final int maxStep;
     private int step = 0;
 
@@ -37,7 +37,7 @@ public class ParticleTrain {
         try {
             DecimalFormat decimalFormat = new DecimalFormat("#.######");
             String formattedDeltaT = decimalFormat.format(deltaT);
-            BufferedWriter writer = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/particle_train_"
+            BufferedWriter writer = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs_mine/particle_train_"
                     + particles.size() + "_" + formattedDeltaT + ".txt", true));
 
             writer.write("Time " + step * deltaT + "\n");
@@ -59,15 +59,15 @@ public class ParticleTrain {
         for (int j = 1; j <= maxStep; j++) {
             this.step = j;
 
+            calculateCollisions();
+
             for (Particle particle : particles) {
                 if (particle.getR() > L) {
                     particle.setR(particle.getR() - L);
                 }
 
-                particle.getNextBeeman();
+                particle.getNextGear();
             }
-
-            calculateCollisions();
 
             if (deltaT >= 0.1 || (step % ((int) (1 / deltaT)) == 0)) {
                 writeOutputStep();
@@ -101,15 +101,15 @@ public class ParticleTrain {
 
     public static void main(String[] args) {
         // Constants
-        double r = 0.0225; // [m]
-        double m = 0.025; // [kg]
-        double L = 1.35; // [m]
+        double r = 2.25; // [cm]
+        double m = 25; // [g]
+        double L = 135; // [cm]
         double tau = 1; // [s]
 
         Random random = new Random();
 
-        double[] deltaTs = {0.0001};
-        int[] Ns = {5, 10, 15, 20, 25, 30};
+        double[] deltaTs = {0.1, 0.01, 0.001, 0.0001, 0.00001};
+        int[] Ns = {25};
         int tf = 180; // [s]
 
         for (int n : Ns) {
@@ -130,12 +130,13 @@ public class ParticleTrain {
                 }
                 taken[index] = 1;
                 double x = xs[index];
-                double limitVelocity = random.nextDouble() * 0.03 + 0.09; // [9-12] [cm/s]
+                double limitVelocity = random.nextDouble() * 3 + 9; // [9-12] [cm/s]
 
                 particles.add(new Particle(m, r, limitVelocity, tau, x, limitVelocity));
             }
 
             for (double deltaT : deltaTs) {
+                System.out.println("N: " + n + " deltaT: " + deltaT);
                 ParticleTrain particleTrain = new ParticleTrain(particles, deltaT, tf, L);
                 particleTrain.start();
             }
@@ -146,9 +147,9 @@ public class ParticleTrain {
     // Orderer ASC
     public static void main(String[] args) {
         // Constants
-        double r = 0.0225; // [m]
-        double m = 0.025; // [kg]
-        double L = 1.35; // [m]
+        double r = 2.25; // [cm]
+        double m = 25; // [g]
+        double L = 135; // [cm]
         double tau = 1; // [s]
 
         Random random = new Random();
@@ -165,7 +166,7 @@ public class ParticleTrain {
             double[] limitVelocities = new double[n];
             for (int i = 0; i < n; i++) {
                 xs[i] = i * L / n;
-                limitVelocities[i] = random.nextDouble() * 0.03 + 0.09; // [9-12] [cm/s]
+                limitVelocities[i] = random.nextDouble() * 3 + 9; // [9-12] [cm/s]
             }
             // sort limitVelocities ASC
             Arrays.sort(limitVelocities);

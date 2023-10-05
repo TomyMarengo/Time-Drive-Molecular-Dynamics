@@ -1,5 +1,7 @@
 package objects;
 
+import static utils.Integrator.factorial;
+
 public class Particle {
     private final double mass; // Mass of the particle
     private final double radius; // Radius of the particle
@@ -12,6 +14,12 @@ public class Particle {
     private double r1_last;
     private double r2;
     private double r2_last;
+    private double r3;
+    private double r3_last;
+    private double r4;
+    private double r4_last;
+    private double r5;
+    private double r5_last;
     private final double deltaT;
 
 
@@ -24,25 +32,52 @@ public class Particle {
         this.radius = radius;
         this.limitVelocity = limitVelocity;
         this.tau = tau;
-        this.r_last = r_0;
+        this.r_last = r_0 - deltaT * r1_0 + deltaT * deltaT * ((limitVelocity - r1_last) / (tau * mass) + addedForces / mass) / 2;
         this.r = r_0;
-        this.r1_last = r1_0;
+        this.r1_last = r1_0 - deltaT * ((limitVelocity - r1_last) / (tau * mass) + addedForces / mass);
         this.r1 = r1_0;
         this.r2_last = (limitVelocity - r1_last) / (tau * mass) + addedForces / mass;
         this.r2 = (limitVelocity - r1_0) / (tau * mass) + addedForces / mass;
+        this.r3 = 0;
+        this.r3_last = 0;
+        this.r4 = 0;
+        this.r4_last = 0;
+        this.r5 = 0;
+        this.r5_last = 0;
         this.deltaT = deltaT;
     }
 
-    public void getNextBeeman() {
-        r_last = r;
-        r = r + r1 * deltaT + (2.0 / 3.0) * r2 * deltaT * deltaT - (1.0 / 6.0) * r2_last * deltaT * deltaT;
-        r1_last = r1;
-        double r1_predicted = r1 + (3.0 / 2.0) * r2 * deltaT - (1.0 / 2.0) * r2_last * deltaT;
+    public void getNextGear() {
+        double[] coefficents = {3.0 / 16.0, 251.0 / 360.0, 1.0, 11.0 / 18.0, 1.0 / 6.0, 1.0 / 60.0};
+        double[] rp = {0, 0, 0, 0, 0, 0};
+        double[] my_r = {this.r, this.r1, this.r2, this.r3, this.r4, this.r5};
+        double[] my_r_last = {this.r_last, this.r1_last, this.r2_last, this.r3_last, this.r4_last, this.r5_last};
 
-        double r2_next = (limitVelocity - r1_predicted) / (tau * mass) + addedForces / mass;
-        r1 = r1 + (1.0 / 3.0) * r2_next * deltaT + (5.0 / 6.0) * r2 * deltaT - (1.0 / 6.0) * r2_last * deltaT;
-        r2_last = r2;
-        r2 = r2_next;
+        for (int i = 0; i <= 5; i++) {
+            for (int j = i; j <= 5; j++) {
+                rp[i] = rp[i] + my_r_last[j] * Math.pow(deltaT, j - i) / factorial(j - i);
+            }
+        }
+
+        double deltaA = (limitVelocity - rp[1]) / (tau * mass) + addedForces / mass - rp[2];
+        double deltaR2 = deltaA * deltaT * deltaT / 2.0;
+
+        for (int i = 0; i <= 5; i++) {
+            my_r[i] = rp[i] + coefficents[i] * deltaR2 * factorial(i) / Math.pow(deltaT, i);
+        }
+
+        this.r_last = this.r;
+        this.r = my_r[0];
+        this.r1_last = this.r1;
+        this.r1 = my_r[1];
+        this.r2_last = this.r2;
+        this.r2 = my_r[2];
+        this.r3_last = this.r3;
+        this.r3 = my_r[3];
+        this.r4_last = this.r4;
+        this.r4 = my_r[4];
+        this.r5_last = this.r5;
+        this.r5 = my_r[5];
 
         addedForces = 0;
     }
