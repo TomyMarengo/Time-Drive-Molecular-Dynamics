@@ -5,6 +5,7 @@ import utils.Writer;
 
 import java.io.*;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 
 public class ParticleTrain {
@@ -33,6 +34,8 @@ public class ParticleTrain {
     private void writeOutputStep() {
         try {
             DecimalFormat decimalFormat = new DecimalFormat("#.######");
+            // Decimal format with locale US
+            decimalFormat.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.US));
             String formattedDeltaT = decimalFormat.format(deltaT);
             BufferedWriter writer = new BufferedWriter(new FileWriter("../time-drive-molecular-dynamics-animation/outputs/particle_train_"
                     + particles.size() + "_" + formattedDeltaT + ".txt", true));
@@ -57,12 +60,6 @@ public class ParticleTrain {
             this.step = j;
 
             for (Particle particle : particles) {
-                particle.removeForces();
-            }
-
-            calculateCollisions();
-
-            for (Particle particle : particles) {
                 if (particle.getrMap().get(step - 1) > L) {
                     particle.getrMap().put(step - 1, particle.getrMap().get(step - 1) - L);
                 }
@@ -73,8 +70,14 @@ public class ParticleTrain {
                 particle.getR1Map().put(step , rBeeman[1]);
                 particle.getR2Map().put(step, particle.getForceFunction().apply(rBeeman[0], rBeeman[1]) / particle.getMass());
 
+                particle.removeForces();
+
                 particle.cleanMaps(step);
             }
+
+            calculateCollisions();
+
+
 
             if (deltaT >= 0.1 || (step % ((int) (1 / deltaT)) == 0)) {
                 writeOutputStep();
@@ -91,12 +94,10 @@ public class ParticleTrain {
             for (int j = i + 1; j < particles.size(); j++) {
                 Particle particle2 = particles.get(j);
 
-
                 if (collides(particle1, particle2)) {
                     double force = k * (Math.abs(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1))
                             - (particle1.getRadius() + particle2.getRadius())) * Math.signum(particle2.getrMap().get(step - 1) - particle1.getrMap().get(step - 1));
                     particle1.addForce(force);
-                    particle2.addForce(-force);
                 }
 
             }
@@ -107,7 +108,6 @@ public class ParticleTrain {
         return Math.abs(particle1.getrMap().get(step - 1) - particle2.getrMap().get(step - 1)) <= (particle1.getRadius() + particle2.getRadius());
     }
 
-    /*
     public static void main(String[] args) {
         // Constants
         double r = 0.0225; // [m]
@@ -118,7 +118,7 @@ public class ParticleTrain {
         Random random = new Random();
 
         double[] deltaTs = {0.001};
-        int[] Ns = {5, 10, 15, 20, 25, 30};
+        int[] Ns = {10};
         int tf = 180; // [s]
 
         for (int n : Ns) {
@@ -149,8 +149,9 @@ public class ParticleTrain {
                 particleTrain.start();
             }
         }
-    }*/
+    }
 
+    /*
     // Orderer ASC
     public static void main(String[] args) {
         // Constants
@@ -187,5 +188,5 @@ public class ParticleTrain {
                 particleTrain.start();
             }
         }
-    }
+    }*/
 }
